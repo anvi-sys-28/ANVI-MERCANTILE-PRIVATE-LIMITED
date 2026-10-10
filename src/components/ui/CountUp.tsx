@@ -31,8 +31,8 @@ export default function CountUp({
   const ref = useRef<HTMLSpanElement>(null);
   const motionValue = useMotionValue(direction === 'down' ? to : from);
 
-  const damping = 20 + 40 * (1 / duration);
-  const stiffness = 100 * (1 / duration);
+  const damping = 20 + 40 * (1 / Math.max(0.1, duration));
+  const stiffness = 100 * (1 / Math.max(0.1, duration));
 
   const springValue = useSpring(motionValue, {
     damping,
@@ -60,6 +60,7 @@ export default function CountUp({
   const formatValue = useCallback(
     (latest: number) => {
       const hasDecimals = maxDecimals > 0;
+      const displayVal = hasDecimals ? latest : Math.round(latest);
 
       const options: Intl.NumberFormatOptions = {
         useGrouping: !!separator,
@@ -67,7 +68,7 @@ export default function CountUp({
         maximumFractionDigits: hasDecimals ? maxDecimals : 0
       };
 
-      const formattedNumber = Intl.NumberFormat('en-US', options).format(latest);
+      const formattedNumber = Intl.NumberFormat('en-US', options).format(displayVal);
 
       return separator ? formattedNumber.replace(/,/g, separator) : formattedNumber;
     },
