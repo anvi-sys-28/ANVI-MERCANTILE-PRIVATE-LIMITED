@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import InkBlotCarousel from '@/components/ui/ink-blot-carousel';
 import CountUp from '@/components/ui/CountUp';
 
@@ -46,46 +46,41 @@ const CAROUSEL_SLIDES = [
 
 export function HeroSection() {
   const [showCarousel, setShowCarousel] = useState(false);
-  const [resetKey] = useState(0);
+  const [countdown, setCountdown] = useState(10);
 
-  // Automatically switch Hero UI to InkBlotCarousel view after 10 seconds
+  // 10-Second Live Integer Countdown (10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
   useEffect(() => {
     if (showCarousel) return;
 
-    const timer = setTimeout(() => {
-      setShowCarousel(true);
-    }, 10000);
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setShowCarousel(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
-    return () => clearTimeout(timer);
+    return () => clearInterval(timer);
   }, [showCarousel]);
 
   return (
     <div className="relative w-full min-h-screen bg-black text-white overflow-hidden font-sans">
       
-      {/* 10-Second Live Countdown Badge positioned at TOP RIGHT SIDE */}
-      <AnimatePresence>
+      {/* Plain Live Number Countdown without box or text overlay */}
+      <AnimatePresence mode="wait">
         {!showCarousel && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="absolute top-24 sm:top-28 right-6 lg:right-12 z-30 flex items-center gap-2 bg-black/60 backdrop-blur-md border border-white/20 px-4 py-2 rounded-full shadow-2xl"
+            key={countdown}
+            initial={{ opacity: 0.5, scale: 1.12 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.88 }}
+            transition={{ duration: 0.2 }}
+            className="absolute top-24 sm:top-28 right-6 lg:right-12 z-30 font-sans font-extrabold text-3xl sm:text-5xl text-white drop-shadow-md select-none pointer-events-none"
           >
-            <Sparkles className="w-3.5 h-3.5 text-sky-400 animate-pulse" />
-            <span className="text-xs font-mono text-white/90">
-              Switching UI in{' '}
-              <span className="font-bold text-sky-400">
-                <CountUp
-                  key={resetKey}
-                  from={0}
-                  to={10}
-                  duration={10}
-                  direction="down"
-                  onEnd={() => setShowCarousel(true)}
-                />
-                s
-              </span>
-            </span>
+            {countdown}
           </motion.div>
         )}
       </AnimatePresence>

@@ -26,32 +26,6 @@ const values = [
   }
 ];
 
-const team = [
-  {
-    name: "Vikram Malhotra",
-    role: "Founder & Managing Director",
-    experience: "22+ Years in International Maritime Trade",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80"
-  },
-  {
-    name: "Ananya Sharma",
-    role: "Head of Customs Brokerage & Compliance",
-    experience: "Customs House Agent (CHA) License Master",
-    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80"
-  },
-  {
-    name: "Rohan Varma",
-    role: "VP of Ocean Freight Operations",
-    experience: "Ex-Maersk Senior Vessel Operations Controller",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80"
-  },
-  {
-    name: "Priya Nair",
-    role: "Director of Air Cargo & Cold Chain",
-    experience: "IATA Certified Dangerous Goods Expert",
-    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=400&q=80"
-  }
-];
 
 export default function AboutPage() {
   return (
@@ -212,48 +186,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Leadership Team Grid */}
-      <section className="py-20 bg-[#f7f5f0]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          <div className="text-center space-y-2 max-w-2xl mx-auto">
-            <span className="text-[#c9a46b] text-xs font-bold font-headline uppercase tracking-widest block">
-              TRADE LEADERSHIP
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-headline uppercase text-[#0b3a40]">
-              EXECUTIVE MANAGEMENT TEAM
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {team.map((member, idx) => (
-              <div
-                key={idx}
-                className="bg-white rounded-xl overflow-hidden border border-[#0b3a40]/10 shadow-md hover:shadow-xl transition-all space-y-4 p-4 text-center"
-              >
-                <img
-                  src={member.image}
-                  alt={member.name}
-                  width="400"
-                  height="400"
-                  loading="lazy"
-                  className="w-32 h-32 rounded-full object-cover mx-auto border-2 border-[#c9a46b]"
-                />
-                <div className="space-y-1">
-                  <h3 className="font-bold font-headline uppercase text-lg text-[#0b3a40]">
-                    {member.name}
-                  </h3>
-                  <p className="text-xs font-bold text-[#0f5c66] font-headline uppercase">
-                    {member.role}
-                  </p>
-                  <p className="text-[11px] text-[#1a1f23]/70 font-sans">
-                    {member.experience}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       <FinalCtaSection />
     </>
