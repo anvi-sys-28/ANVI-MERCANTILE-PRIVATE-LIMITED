@@ -84,23 +84,28 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
                 <img
                   src="/ll.png"
                   alt="Anvi Mercantile Logo"
-                  className="h-7 sm:h-8 w-auto object-contain shrink-0 group-hover:scale-105 transition-transform"
+                  className="h-8 sm:h-9 w-auto object-contain shrink-0 group-hover:scale-105 transition-transform"
                 />
-                <div className="w-44 sm:w-52 h-7 sm:h-8 flex items-center">
-                  <StrokeText
-                    key={isIntroActive ? 'intro-pending' : 'hero-entered'}
-                    text="ANVI MERCANTILE"
-                    strokeColor="#38BDF8"
-                    fillColor="#FFFFFF"
-                    strokeWidth={1.4}
-                    fontSize={54}
-                    fontWeight={800}
-                    letterSpacing={-1}
-                    drawDuration={1.4}
-                    fillDelay={0.1}
-                    trigger="mount"
-                    fillMode="wipe"
-                  />
+                <div className="flex flex-col justify-center">
+                  <div className="w-44 sm:w-52 h-6 sm:h-7 flex items-center">
+                    <StrokeText
+                      key={isIntroActive ? 'intro-pending' : 'hero-entered'}
+                      text="ANVI MERCANTILE"
+                      strokeColor="#38BDF8"
+                      fillColor="#FFFFFF"
+                      strokeWidth={1.4}
+                      fontSize={54}
+                      fontWeight={800}
+                      letterSpacing={-1}
+                      drawDuration={1.4}
+                      fillDelay={0.1}
+                      trigger="mount"
+                      fillMode="wipe"
+                    />
+                  </div>
+                  <span className="text-[9px] sm:text-[10px] font-bold text-orange-400 tracking-[0.2em] uppercase leading-none mt-0.5">
+                    By ANVI GROUPS
+                  </span>
                 </div>
               </Link>
             </div>

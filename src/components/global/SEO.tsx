@@ -13,14 +13,14 @@ interface SEOProps {
 
 export function SEO({
   title,
-  description = "Leading fresh fruits and vegetables exporters from India. Direct farm sourcing of pomegranates, grapes, guavas, onions, chillies with export-ready cold-chain logistics. Minimum order quantity 10 MT.",
-  keywords = "fresh fruits exporters, fresh fruits exporters in india, fresh produce exporters, bulk fruit export suppliers, pomegranate exporters india, fresh grapes export, vegetable exporters india, agricultural commodity export, anvi mercantile, global fruit suppliers, reefer fruit shipment",
+  description = "By ANVI GROUPS — India's premier fresh fruits and agricultural commodities exporters. Farm-direct ruby pomegranates, sweet seedless grapes, pink guavas, onions & green chillies. Bulk export MOQ 10 MT.",
+  keywords = "fresh fruits exporters, fresh fruits exporters in india, fresh produce exporters, bulk fruit export suppliers, pomegranate exporters india, fresh grapes export, vegetable exporters india, agricultural commodity export, anvi mercantile, anvi groups, global fruit suppliers, reefer fruit shipment",
   canonical,
-  ogImage = 'https://www.anvimercantile.in/a.png',
+  ogImage = 'https://www.anvimercantile.in/llll.webp',
   ogType = 'website',
   schema,
 }: SEOProps) {
-  const fullTitle = title ? `${title} | ANVI Mercantile` : "Fresh Fruits & Vegetables Exporters | ANVI Mercantile";
+  const fullTitle = title ? `${title} | By ANVI GROUPS` : "ANVI MERCANTILE PRIVATE LIMITED | By ANVI GROUPS";
   const url = canonical ? canonical : typeof window !== 'undefined' ? window.location.href : 'https://www.anvimercantile.in';
 
   return (

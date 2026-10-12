@@ -40,7 +40,7 @@ export function Footer() {
   return (
     <HalftoneWordmarkFooter
       wordmark="ANVI GROUPS"
-      label="ANVI MERCANTILE PVT. LTD."
+      label="ANVI MERCANTILE PVT. LTD. · BY ANVI GROUPS"
       meta="© 2026 ANVI GROUPS · GLOBAL TRADE & LOGISTICS"
       columns={FOOTER_COLUMNS}
       backToTop={true}

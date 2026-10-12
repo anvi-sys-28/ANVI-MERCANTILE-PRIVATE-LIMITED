@@ -1,8 +1,8 @@
 export const siteConfig = {
-  name: "Anvi Mercantile",
+  name: "ANVI GROUPS | ANVI MERCANTILE",
   legalName: "ANVI MERCANTILE PRIVATE LIMITED",
-  tagline: "Moving Business Across Borders",
-  subTagline: "Premier Import/Export Facilitation & Global Logistics",
+  tagline: "By ANVI GROUPS — Moving Business Across Borders",
+  subTagline: "Premier Fresh Fruits Exporters & Global Agricultural Logistics",
   foundingYear: "2014",
   location: {
     address: "Suite 408, Trade Centre, Bandra Kurla Complex",
