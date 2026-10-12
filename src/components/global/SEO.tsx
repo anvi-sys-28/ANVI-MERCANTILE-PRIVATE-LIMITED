@@ -16,12 +16,12 @@ export function SEO({
   description = "Leading fresh fruits and vegetables exporters from India. Direct farm sourcing of pomegranates, grapes, guavas, onions, chillies with export-ready cold-chain logistics. Minimum order quantity 10 MT.",
   keywords = "fresh fruits exporters, fresh fruits exporters in india, fresh produce exporters, bulk fruit export suppliers, pomegranate exporters india, fresh grapes export, vegetable exporters india, agricultural commodity export, anvi mercantile, global fruit suppliers, reefer fruit shipment",
   canonical,
-  ogImage = 'https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=1200&q=80',
+  ogImage = 'https://www.anvimercantile.in/a.png',
   ogType = 'website',
   schema,
 }: SEOProps) {
   const fullTitle = title ? `${title} | ANVI Mercantile` : "Fresh Fruits & Vegetables Exporters | ANVI Mercantile";
-  const url = canonical ? canonical : typeof window !== 'undefined' ? window.location.href : 'https://anvimercantile.com';
+  const url = canonical ? canonical : typeof window !== 'undefined' ? window.location.href : 'https://www.anvimercantile.in';
 
   return (
     <Helmet>
