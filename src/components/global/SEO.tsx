@@ -23,6 +23,8 @@ export function SEO({
     <Helmet>
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
+      <link rel="icon" type="image/png" href="/a.png" />
+      <link rel="apple-touch-icon" href="/a.png" />
 
       {/* Open Graph */}
       <meta property="og:title" content={fullTitle} />

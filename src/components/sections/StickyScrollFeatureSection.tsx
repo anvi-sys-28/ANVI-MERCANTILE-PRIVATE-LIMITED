@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -29,12 +29,36 @@ const PRODUCE_ITEMS = [
 ];
 
 export function StickyScrollFeatureSection({
-  videoUrl = "https://assets.mixkit.co/videos/preview/mixkit-cargo-ship-sailing-in-the-sea-43183-large.mp4",
+  videoUrl = '/b.mp4',
   posterUrl = '/b.png',
 }: StickyScrollFeatureSectionProps) {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Ensure b.mp4 starts instantly and smoothly
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.defaultMuted = true;
+    video.muted = isMuted;
+
+    const playVideo = () => {
+      const promise = video.play();
+      if (promise !== undefined) {
+        promise
+          .then(() => setIsPlaying(true))
+          .catch(() => setIsPlaying(false));
+      }
+    };
+
+    if (video.readyState >= 2) {
+      playVideo();
+    } else {
+      video.addEventListener('canplay', playVideo, { once: true });
+    }
+  }, [isMuted]);
 
   const togglePlay = () => {
     if (!videoRef.current) return;
@@ -54,17 +78,17 @@ export function StickyScrollFeatureSection({
   };
 
   return (
-    <section className="relative w-full bg-[#05080e] text-white pt-2 sm:pt-4 pb-20 sm:pb-32 border-b border-white/10 overflow-visible font-sans">
+    <section className="relative w-full bg-[#05080e] text-white pt-4 sm:pt-6 pb-20 sm:pb-32 border-b border-white/10 overflow-visible font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Main Grid: 2 Columns on Desktop, Normal Flow on Mobile */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-start">
 
-          {/* LEFT COLUMN: STICKY MEDIA PANEL (Prominent & Widescreen) */}
-          <div className="lg:col-span-7 xl:col-span-7 lg:sticky lg:top-24 w-full z-20">
-            <div className="relative w-full h-[380px] sm:h-[480px] lg:h-[min(78vh,660px)] rounded-[28px] overflow-hidden bg-[#0d111a] border border-white/10 shadow-2xl group">
+          {/* LEFT COLUMN: STICKY MEDIA PANEL (Responsive Viewport Scaled) */}
+          <div className="lg:col-span-7 xl:col-span-7 lg:sticky lg:top-24 w-full z-20 self-start">
+            <div className="relative w-full h-[360px] sm:h-[440px] lg:h-[clamp(420px,calc(100vh-140px),550px)] rounded-[28px] lg:rounded-[32px] overflow-hidden bg-[#0d111a] border border-white/10 shadow-2xl group">
               
-              {/* HTML5 Loop Video */}
+              {/* HTML5 Fast Local b.mp4 Video */}
               <video
                 ref={videoRef}
                 src={videoUrl}
@@ -73,15 +97,18 @@ export function StickyScrollFeatureSection({
                 muted={isMuted}
                 loop
                 playsInline
+                preload="auto"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
+              >
+                <source src={videoUrl} type="video/mp4" />
+              </video>
 
               {/* Dark subtle gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/20 pointer-events-none" />
 
               {/* Floating SHOWREEL 25/26 Pill Badge matching Phenomenon Studio reference image */}
-              <div className="absolute top-1/2 right-6 -translate-y-1/2 z-10">
-                <div className="inline-flex items-center gap-2 bg-black/70 backdrop-blur-md border border-white/20 px-4 py-2 rounded-full shadow-2xl text-xs font-mono tracking-wider text-white uppercase group-hover:bg-white group-hover:text-black transition-all">
+              <div className="absolute top-[52%] right-6 -translate-y-1/2 z-10">
+                <div className="inline-flex items-center gap-2 bg-black/75 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full shadow-2xl text-xs font-mono tracking-wider text-white uppercase group-hover:bg-white group-hover:text-black transition-all">
                   <span className="underline underline-offset-4 font-semibold">SHOWREEL 25/26</span>
                   <span className="text-[10px]">▶</span>
                 </div>
@@ -116,48 +143,56 @@ export function StickyScrollFeatureSection({
           </div>
 
 
-          {/* RIGHT COLUMN: SCROLLING CONTENT (Compact & Editorial) */}
-          <div className="lg:col-span-5 xl:col-span-5 flex flex-col justify-between space-y-10 sm:space-y-14 pt-4 lg:pt-10 xl:pt-12">
+          {/* RIGHT COLUMN: SCROLLING CONTENT (Matches Video Height in First Viewport) */}
+          <div className="lg:col-span-5 xl:col-span-5 flex flex-col justify-start">
             
-            {/* Main Editorial Statement matching Phenomenon Studio font & layout */}
-            <div className="space-y-3">
-              <h2 className="text-2xl sm:text-3xl lg:text-[34px] xl:text-[38px] font-normal leading-[1.3] text-white tracking-tight">
-                From Our Own Farms to Global Markets — Fresh Produce, Packed for Export.
-              </h2>
-              <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-sans pt-1">
-                Freshly harvested fruits and vegetables sourced directly from our own farms, with quality maintained throughout harvesting, packing, and export. We serve international buyers with dependable bulk supply and a minimum order quantity of 10 MT.
-              </p>
-            </div>
-
-            {/* BLOCK 1: FRUITS & VEGETABLES EXPORTED - MONOCHROME WHITE RIGHT-TO-LEFT TICKER */}
-            <div className="pt-6 border-t border-white/10 space-y-4">
-              <div className="text-[11px] font-bold font-mono uppercase tracking-[0.2em] text-slate-400">
-                DIRECT FARM SOURCING · FRESH HARVEST · EXPORT-READY QUALITY
+            {/* INITIAL VIEWPORT LOCKUP: Matches Left Video Box Height 1-to-1 on All Screen Sizes */}
+            <div className="min-h-[360px] sm:min-h-[440px] lg:h-[clamp(420px,calc(100vh-140px),550px)] flex flex-col justify-between py-1">
+              
+              {/* Editorial Statement */}
+              <div className="space-y-3 sm:space-y-4">
+                <h2 className="text-2xl sm:text-3xl lg:text-[32px] xl:text-[36px] font-normal leading-[1.22] text-white tracking-tight">
+                  From Our Own Farms to Global Markets — Fresh Produce, Packed for Export.
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans pt-0.5">
+                  Freshly harvested fruits and vegetables sourced directly from our own farms, with quality maintained throughout harvesting, packing, and export. We serve international buyers with dependable bulk supply and a minimum order quantity of 10 MT.
+                </p>
               </div>
 
-              {/* Monochrome White Right-to-Left Infinite Ticker matching attached image */}
-              <div className="relative w-full overflow-hidden border-y border-white/10 py-5 bg-[#080b12] group">
-                <div className="flex w-max items-center gap-0 animate-ticker-left group-hover:[animation-play-state:paused]">
-                  {[1, 2, 3].map((setIndex) => (
-                    <div key={`produce-set-${setIndex}`} className="flex items-center">
-                      {PRODUCE_ITEMS.map((item, idx) => (
-                        <div
-                          key={`produce-${setIndex}-${idx}`}
-                          className="px-8 py-2 border-r border-white/15 flex items-center justify-center shrink-0 cursor-default"
-                        >
-                          <span className="text-white font-mono font-extrabold text-sm sm:text-base tracking-wider uppercase whitespace-nowrap">
-                            {item}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  ))}
+              {/* BLOCK 1: FRUITS & VEGETABLES EXPORTED - MONOCHROME WHITE TICKER */}
+              <div className="space-y-3 pt-3">
+                <div className="text-[11px] font-bold font-mono uppercase tracking-[0.2em] text-slate-400">
+                  DIRECT FARM SOURCING · FRESH HARVEST · EXPORT-READY QUALITY
+                </div>
+
+                {/* Monochrome White Right-to-Left Infinite Ticker */}
+                <div className="relative w-full overflow-hidden border-y border-white/10 py-3.5 bg-[#080b12] group">
+                  <div className="flex w-max items-center gap-0 animate-ticker-left group-hover:[animation-play-state:paused]">
+                    {[1, 2, 3].map((setIndex) => (
+                      <div key={`produce-set-${setIndex}`} className="flex items-center">
+                        {PRODUCE_ITEMS.map((item, idx) => (
+                          <div
+                            key={`produce-${setIndex}-${idx}`}
+                            className="px-6 py-1.5 border-r border-white/15 flex items-center justify-center shrink-0 cursor-default"
+                          >
+                            <span className="text-white font-mono font-extrabold text-xs sm:text-sm tracking-wider uppercase whitespace-nowrap">
+                              {item}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
+
             </div>
 
-            {/* BLOCK 2: ANVI MERCANTILE IN NUMBERS */}
-            <div className="pt-6 border-t border-white/10 space-y-4">
+            {/* SCROLLING EXPANSION CONTENT (Follows Naturally as User Scrolls Down) */}
+            <div className="mt-12 sm:mt-16 space-y-12 sm:space-y-16">
+
+              {/* BLOCK 2: ANVI MERCANTILE IN NUMBERS */}
+              <div className="pt-6 border-t border-white/10 space-y-4">
               <div className="text-[11px] font-bold font-mono uppercase tracking-[0.2em] text-slate-400">
                 ANVI MERCANTILE IN NUMBERS
               </div>
@@ -270,6 +305,7 @@ export function StickyScrollFeatureSection({
                 <ArrowUpRight className="w-4 h-4 text-black" />
               </Link>
             </div>
+          </div>
 
           </div>
 
