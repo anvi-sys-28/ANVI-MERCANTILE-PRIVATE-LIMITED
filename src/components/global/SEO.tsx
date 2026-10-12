@@ -16,7 +16,7 @@ export function SEO({
   description = "By ANVI GROUPS — India's premier fresh fruits and agricultural commodities exporters. Farm-direct ruby pomegranates, sweet seedless grapes, pink guavas, onions & green chillies. Bulk export MOQ 10 MT.",
   keywords = "fresh fruits exporters, fresh fruits exporters in india, fresh produce exporters, bulk fruit export suppliers, pomegranate exporters india, fresh grapes export, vegetable exporters india, agricultural commodity export, anvi mercantile, anvi groups, global fruit suppliers, reefer fruit shipment",
   canonical,
-  ogImage = 'https://www.anvimercantile.in/llll.webp',
+  ogImage = 'https://www.anvimercantile.in/a.png',
   ogType = 'website',
   schema,
 }: SEOProps) {
