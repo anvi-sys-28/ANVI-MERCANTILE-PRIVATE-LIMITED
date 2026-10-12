@@ -82,9 +82,9 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
 
               <Link to="/" className="flex items-center gap-2.5 group">
                 <img
-                  src="/ll.png"
+                  src="/a.png"
                   alt="Anvi Mercantile Logo"
-                  className="h-8 sm:h-9 w-auto object-contain shrink-0 group-hover:scale-105 transition-transform"
+                  className="h-8 sm:h-9 w-auto object-contain rounded shrink-0 group-hover:scale-105 transition-transform"
                 />
                 <div className="flex flex-col justify-center">
                   <div className="w-44 sm:w-52 h-6 sm:h-7 flex items-center">
