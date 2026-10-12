@@ -13,11 +13,11 @@ export const siteConfig = {
     googleMapsEmbed: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3770.787680072049!2d72.86877!3d19.06648!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7c8e0b0000001%3A0x7d00000000000000!2sBandra%20Kurla%20Complex!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
   },
   contact: {
-    phone: "+91 98765 43210",
+    phone: "+91 8328246413",
     email: "info@anvimercantile.com",
     supportEmail: "support@anvimercantile.com",
-    whatsappNumber: "919876543210",
-    whatsappDisplay: "+91 98765 43210",
+    whatsappNumber: "918328246413",
+    whatsappDisplay: "+91 8328246413",
     workingHours: "Mon - Sat: 9:00 AM - 7:00 PM IST"
   },
   socials: {

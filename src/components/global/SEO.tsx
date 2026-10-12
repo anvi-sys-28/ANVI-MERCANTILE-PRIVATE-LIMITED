@@ -4,27 +4,34 @@ import { siteConfig } from '@/data/siteConfig';
 interface SEOProps {
   title?: string;
   description?: string;
+  keywords?: string;
   canonical?: string;
   ogImage?: string;
   ogType?: 'website' | 'article';
+  schema?: object;
 }
 
 export function SEO({
   title,
-  description = siteConfig.subTagline,
+  description = "Leading fresh fruits and vegetables exporters from India. Direct farm sourcing of pomegranates, grapes, guavas, onions, chillies with export-ready cold-chain logistics. Minimum order quantity 10 MT.",
+  keywords = "fresh fruits exporters, fresh fruits exporters in india, fresh produce exporters, bulk fruit export suppliers, pomegranate exporters india, fresh grapes export, vegetable exporters india, agricultural commodity export, anvi mercantile, global fruit suppliers, reefer fruit shipment",
   canonical,
   ogImage = 'https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=1200&q=80',
   ogType = 'website',
+  schema,
 }: SEOProps) {
-  const fullTitle = title ? `${title} | ${siteConfig.name}` : `${siteConfig.name} | ${siteConfig.tagline}`;
+  const fullTitle = title ? `${title} | ANVI Mercantile` : "Fresh Fruits & Vegetables Exporters | ANVI Mercantile";
   const url = canonical ? canonical : typeof window !== 'undefined' ? window.location.href : 'https://anvimercantile.com';
 
   return (
     <Helmet>
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
-      <link rel="icon" type="image/png" href="/a.png" />
-      <link rel="apple-touch-icon" href="/a.png" />
+      <meta name="keywords" content={keywords} />
+      <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+      <link rel="icon" type="image/png" href="/a.png?v=20261012" />
+      <link rel="shortcut icon" href="/a.png?v=20261012" />
+      <link rel="apple-touch-icon" href="/a.png?v=20261012" />
 
       {/* Open Graph */}
       <meta property="og:title" content={fullTitle} />
@@ -41,6 +48,11 @@ export function SEO({
       <meta name="twitter:image" content={ogImage} />
 
       <link rel="canonical" href={url} />
+      {schema && (
+        <script type="application/ld+json">
+          {JSON.stringify(schema)}
+        </script>
+      )}
     </Helmet>
   );
 }

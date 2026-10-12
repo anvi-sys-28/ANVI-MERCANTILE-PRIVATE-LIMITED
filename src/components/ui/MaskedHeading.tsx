@@ -327,7 +327,16 @@ export default function MaskedHeading({
         <span className="masked-heading__clip" style={{ clipPath: `url(#${clipId})` }}>
           <span ref={mediaRef} className="masked-heading__media">
             {mediaType === 'video' ? (
-              <video className="masked-heading__source" src={src} poster={poster} autoPlay muted loop playsInline />
+              <video
+                className="masked-heading__source"
+                src={src}
+                poster={poster}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+              />
             ) : (
               <img className="masked-heading__source" src={src} alt="" draggable={false} />
             )}

@@ -1,3 +1,5 @@
 User-agent: *
 Allow: /
-Sitemap: https://anvitraders.com/sitemap.xml
+
+Sitemap: https://anvimercantile.com/sitemap.xml
+Sitemap: https://www.anvimercantile.com/sitemap.xml

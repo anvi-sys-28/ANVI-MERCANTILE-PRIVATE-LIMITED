@@ -2,37 +2,81 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/a.png" />
-    <link rel="apple-touch-icon" href="/a.png" />
+    <link rel="icon" type="image/png" href="/a.png?v=20261012" />
+    <link rel="shortcut icon" type="image/png" href="/a.png?v=20261012" />
+    <link rel="apple-touch-icon" href="/a.png?v=20261012" />
+    <script>
+      (function() {
+        var link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+        link.type = 'image/png';
+        link.rel = 'shortcut icon';
+        link.href = '/a.png?v=' + Date.now();
+        document.getElementsByTagName('head')[0].appendChild(link);
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ANVI MERCANTILE PRIVATE LIMITED | Moving Business Across Borders</title>
-    <meta name="description" content="Premier import/export facilitation, sea freight forwarding, air cargo logistics, and customs compliance." />
+    <title>Fresh Fruits Exporters &amp; Agri Commodities | ANVI Mercantile</title>
+    <meta name="description" content="India's leading fresh fruits and vegetables exporters. ANVI Mercantile supplies export-grade ruby pomegranates, sweet seedless grapes, pink guavas, onions, green chillies &amp; commodities directly from our farms to international markets. Minimum order quantity 10 MT." />
+    <meta name="keywords" content="fresh fruits exporters, fresh fruits exporters in india, fresh fruit exporters, agricultural commodity exporters, fresh vegetable exporters, pomegranate exporters, grapes export, guava exporter, onion exporter, bulk produce export, anvi mercantile" />
+    <meta name="author" content="ANVI MERCANTILE PRIVATE LIMITED" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-    <!-- JSON-LD Structured Data -->
+    <!-- JSON-LD Structured Data for High Google Search Ranking -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "ImportExportBusiness",
-        "name": "ANVI MERCANTILE PRIVATE LIMITED",
-        "url": "https://anvimercantile.com",
-        "logo": "https://anvimercantile.com/l.png",
-        "description": "Global trade facilitation, sea freight, air cargo, customs clearance & sourcing.",
-        "telephone": "+91 98765 43210",
-        "email": "info@anvimercantile.com",
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": "Trade Centre, BKC",
-          "addressLocality": "Mumbai",
-          "addressRegion": "Maharashtra",
-          "postalCode": "400051",
-          "addressCountry": "IN"
-        },
-        "areaServed": ["IN", "AE", "CN", "US", "EU", "SG"]
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://anvimercantile.com/#organization",
+            "name": "ANVI MERCANTILE PRIVATE LIMITED",
+            "alternateName": ["Anvi Mercantile", "Anvi Groups", "Anvi Fresh Fruits Exporters"],
+            "url": "https://anvimercantile.com",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://anvimercantile.com/a.png",
+              "width": 512,
+              "height": 512
+            },
+            "description": "Premier fresh fruits and vegetables exporters from India. Directly sourcing export-quality ruby pomegranates, sweet seedless grapes, pink guavas, onions, and green chillies with international cold-chain reefer delivery.",
+            "telephone": "+91 8328246413",
+            "email": "info@anvimercantile.com",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Suite 408, Trade Centre, Bandra Kurla Complex",
+              "addressLocality": "Mumbai",
+              "addressRegion": "Maharashtra",
+              "postalCode": "400051",
+              "addressCountry": "IN"
+            },
+            "areaServed": ["IN", "AE", "SA", "US", "EU", "SG", "MY", "BD"],
+            "knowsAbout": [
+              "Fresh Fruits Export",
+              "Fresh Ruby Pomegranates",
+              "Sweet Seedless Grapes",
+              "Fresh Pink Guava",
+              "Fresh Green Chilli",
+              "Red and Golden Onions",
+              "Organic Popped Makhana",
+              "Cold Chain Freight Logistics",
+              "Bulk Produce Export MOQ 10 MT"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://anvimercantile.com/#website",
+            "url": "https://anvimercantile.com",
+            "name": "ANVI Mercantile - Fresh Fruits & Vegetables Exporters",
+            "publisher": {
+              "@id": "https://anvimercantile.com/#organization"
+            }
+          }
+        ]
       }
     </script>
   </head>
