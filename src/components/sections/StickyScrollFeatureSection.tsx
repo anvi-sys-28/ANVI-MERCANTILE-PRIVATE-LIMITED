@@ -34,15 +34,43 @@ export function StickyScrollFeatureSection({
 }: StickyScrollFeatureSectionProps) {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
+  const [isInView, setIsInView] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Ensure b.mp4 starts instantly and smoothly
+  // Lazy-load and play b.mp4 only when section scrolls near viewport
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setIsInView(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { rootMargin: '350px 0px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     video.defaultMuted = true;
     video.muted = isMuted;
+
+    if (!isInView) {
+      if (!video.paused) {
+        video.pause();
+        setIsPlaying(false);
+      }
+      return;
+    }
 
     const playVideo = () => {
       const promise = video.play();
@@ -58,7 +86,7 @@ export function StickyScrollFeatureSection({
     } else {
       video.addEventListener('canplay', playVideo, { once: true });
     }
-  }, [isMuted]);
+  }, [isMuted, isInView]);
 
   const togglePlay = () => {
     if (!videoRef.current) return;
@@ -78,7 +106,7 @@ export function StickyScrollFeatureSection({
   };
 
   return (
-    <section className="relative w-full bg-[#05080e] text-white pt-4 sm:pt-6 pb-20 sm:pb-32 border-b border-white/10 overflow-visible font-sans">
+    <section ref={sectionRef} className="relative w-full bg-[#05080e] text-white pt-4 sm:pt-6 pb-20 sm:pb-32 border-b border-white/10 overflow-visible font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Main Grid: 2 Columns on Desktop, Normal Flow on Mobile */}
@@ -91,16 +119,15 @@ export function StickyScrollFeatureSection({
               {/* HTML5 Fast Local b.mp4 Video */}
               <video
                 ref={videoRef}
-                src={videoUrl}
+                src={isInView ? videoUrl : undefined}
                 poster={posterUrl}
-                autoPlay
                 muted={isMuted}
                 loop
                 playsInline
-                preload="metadata"
+                preload={isInView ? "metadata" : "none"}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               >
-                <source src={videoUrl} type="video/mp4" />
+                {isInView && <source src={videoUrl} type="video/mp4" />}
               </video>
 
               {/* Dark subtle gradient overlay */}

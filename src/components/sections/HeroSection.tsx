@@ -105,6 +105,7 @@ export function HeroSection() {
                 height="1400"
                 fetchPriority="high"
                 loading="eager"
+                decoding="sync"
                 className="w-full h-full object-cover object-center scale-105 transition-transform duration-1000"
               />
               <div className="absolute inset-0 bg-black/45 backdrop-brightness-95 pointer-events-none" />
@@ -153,16 +154,28 @@ export function HeroSection() {
                         className="inline-block h-7 w-7 rounded-full ring-2 ring-slate-900 object-cover"
                         src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80"
                         alt="Leader"
+                        width="28"
+                        height="28"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <img
                         className="inline-block h-7 w-7 rounded-full ring-2 ring-slate-900 object-cover"
                         src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80"
                         alt="Leader"
+                        width="28"
+                        height="28"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <img
                         className="inline-block h-7 w-7 rounded-full ring-2 ring-slate-900 object-cover"
                         src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=100&q=80"
                         alt="Leader"
+                        width="28"
+                        height="28"
+                        loading="lazy"
+                        decoding="async"
                       />
                     </div>
                     <span className="text-xs text-white/80 font-normal">

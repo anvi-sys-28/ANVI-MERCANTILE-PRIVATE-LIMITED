@@ -335,7 +335,7 @@ export default function MaskedHeading({
                 muted
                 loop
                 playsInline
-                preload="auto"
+                preload="metadata"
               />
             ) : (
               <img className="masked-heading__source" src={src} alt="" draggable={false} />
