@@ -30,7 +30,7 @@ const PRODUCE_ITEMS = [
 
 export function StickyScrollFeatureSection({
   videoUrl = '/b.mp4',
-  posterUrl = '/b.png',
+  posterUrl = '/b.webp',
 }: StickyScrollFeatureSectionProps) {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
@@ -97,7 +97,7 @@ export function StickyScrollFeatureSection({
                 muted={isMuted}
                 loop
                 playsInline
-                preload="auto"
+                preload="metadata"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               >
                 <source src={videoUrl} type="video/mp4" />

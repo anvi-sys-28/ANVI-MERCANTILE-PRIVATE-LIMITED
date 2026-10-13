@@ -16,7 +16,7 @@ export function SEO({
   description = "By ANVI GROUPS — India's premier fresh fruits and agricultural commodities exporters. Farm-direct ruby pomegranates, sweet seedless grapes, pink guavas, onions & green chillies. Bulk export MOQ 10 MT.",
   keywords = "fresh fruits exporters, fresh fruits exporters in india, fresh produce exporters, bulk fruit export suppliers, pomegranate exporters india, fresh grapes export, vegetable exporters india, agricultural commodity export, anvi mercantile, anvi groups, global fruit suppliers, reefer fruit shipment",
   canonical,
-  ogImage = 'https://www.anvimercantile.in/a.png',
+  ogImage = 'https://www.anvimercantile.in/bs.png',
   ogType = 'website',
   schema,
 }: SEOProps) {
@@ -29,9 +29,9 @@ export function SEO({
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords} />
       <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-      <link rel="icon" type="image/png" href="/a.png?v=20261012" />
-      <link rel="shortcut icon" href="/a.png?v=20261012" />
-      <link rel="apple-touch-icon" href="/a.png?v=20261012" />
+      <link rel="icon" type="image/png" href="/bs.png?v=20261013" />
+      <link rel="shortcut icon" href="/bs.png?v=20261013" />
+      <link rel="apple-touch-icon" href="/bs.png?v=20261013" />
 
       {/* Open Graph */}
       <meta property="og:title" content={fullTitle} />

@@ -7,19 +7,20 @@ interface IntroSplashScreenProps {
   autoHideDuration?: number; // in seconds
 }
 
-export function IntroSplashScreen({ onComplete, autoHideDuration = 4.2 }: IntroSplashScreenProps) {
+export function IntroSplashScreen({ onComplete, autoHideDuration = 2.0 }: IntroSplashScreenProps) {
   const [visible, setVisible] = useState(true);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setVisible(false);
-      if (onComplete) {
-        onComplete();
-      }
-    }, autoHideDuration * 1000);
+  const dismiss = () => {
+    setVisible(false);
+    if (onComplete) {
+      onComplete();
+    }
+  };
 
+  useEffect(() => {
+    const timer = setTimeout(dismiss, autoHideDuration * 1000);
     return () => clearTimeout(timer);
-  }, [autoHideDuration, onComplete]);
+  }, [autoHideDuration]);
 
   return (
     <AnimatePresence>
@@ -27,9 +28,21 @@ export function IntroSplashScreen({ onComplete, autoHideDuration = 4.2 }: IntroS
         <motion.div
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0, scale: 1.02, transition: { duration: 0.9, ease: [0.16, 1, 0.3, 1] } }}
-          className="fixed inset-0 z-[100] bg-black text-white flex flex-col justify-center items-center px-4 sm:px-8 py-12 overflow-hidden font-sans"
+          exit={{ opacity: 0, scale: 1.01, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }}
+          onClick={dismiss}
+          className="fixed inset-0 z-[100] bg-black text-white flex flex-col justify-center items-center px-4 sm:px-8 py-12 overflow-hidden font-sans cursor-pointer select-none"
         >
+          {/* Skip Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              dismiss();
+            }}
+            className="absolute top-5 right-5 sm:top-8 sm:right-8 z-20 text-xs font-mono uppercase tracking-widest text-white/60 hover:text-white bg-white/10 hover:bg-white/20 border border-white/20 px-3.5 py-1.5 rounded-full backdrop-blur-md transition-all"
+          >
+            Skip ✕
+          </button>
+
           {/* Center Masked Heading Container */}
           <div className="relative z-10 w-full max-w-[96vw] xl:max-w-[1440px] mx-auto my-auto flex flex-col items-center justify-center space-y-4 sm:space-y-6 text-center px-2">
             
@@ -37,18 +50,18 @@ export function IntroSplashScreen({ onComplete, autoHideDuration = 4.2 }: IntroS
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
               className="w-full flex justify-center overflow-hidden"
             >
               <MaskedHeading
                 text="ANVI MERCANTILE PVT. LTD."
                 mediaType="video"
                 src="/fruits.mp4"
-                poster="/images/pomegranate.jpg"
+                poster="/images/pomegranate.webp"
                 reveal="rise"
                 trigger="mount"
-                duration={1.6}
-                stagger={0.06}
+                duration={1.2}
+                stagger={0.05}
                 fillScale={1.35}
                 parallax={30}
                 textScale={0.072}
@@ -62,18 +75,18 @@ export function IntroSplashScreen({ onComplete, autoHideDuration = 4.2 }: IntroS
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 1.0, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
               className="w-full flex justify-center overflow-hidden"
             >
               <MaskedHeading
                 text="By ANVI GROUPS"
                 mediaType="video"
                 src="/fruits.mp4"
-                poster="/images/pomegranate.jpg"
+                poster="/images/pomegranate.webp"
                 reveal="rise"
                 trigger="mount"
-                duration={1.4}
-                stagger={0.06}
+                duration={1.1}
+                stagger={0.05}
                 fillScale={1.35}
                 parallax={20}
                 textScale={0.048}
@@ -87,7 +100,7 @@ export function IntroSplashScreen({ onComplete, autoHideDuration = 4.2 }: IntroS
             <motion.p
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.8 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
               className="text-sm sm:text-base md:text-lg font-mono uppercase tracking-[0.25em] sm:tracking-[0.32em] text-white/90 max-w-2xl font-bold pt-3"
             >
               PREMIUM AGRI COMMODITIES · SPICES · FRESH PRODUCE

@@ -15,7 +15,7 @@ export const productsData: ProductItem[] = [
     category: "Spices & Foodstuff",
     name: "Premium Fresh Green Chilly",
     description: "All grades available. Starting from just $1.26/kg (30% below international market rate). Export-grade crisp green chillies with high pungency.",
-    image: "/images/green_chilly.jpg",
+    image: "/images/green_chilly.webp",
     hsCodeRange: "0904 - 2100",
     topDestinations: ["UAE", "USA", "UK", "Saudi Arabia", "Singapore"],
     handlingSpecs: "APEDA & FSSAI Certified, Desiccant-lined Reefer Containers"
@@ -25,7 +25,7 @@ export const productsData: ProductItem[] = [
     category: "Fresh Fruits & Agri",
     name: "Farm Fresh Red & Golden Onions",
     description: "All grades available. Starting from just $0.56/kg (30% below international market rate). Superior quality sorted red and golden onions.",
-    image: "/images/onion.jpg",
+    image: "/images/onion.webp",
     hsCodeRange: "0703 - 1010",
     topDestinations: ["Malaysia", "UAE", "Bangladesh", "Sri Lanka", "Vietnam"],
     handlingSpecs: "Temperature-controlled Ventilated Reefer Shipping"
@@ -35,7 +35,7 @@ export const productsData: ProductItem[] = [
     category: "Fresh Fruits & Agri",
     name: "Fresh Ruby Red Pomegranates",
     description: "All grades available. Starting from just $2.45/kg (30% below international market rate). Premium juicy pomegranates with rich ruby-red seeds.",
-    image: "/images/pomegranate.jpg",
+    image: "/images/pomegranate.webp",
     hsCodeRange: "0810 - 9010",
     topDestinations: ["Netherlands", "UAE", "Saudi Arabia", "UK", "Thailand"],
     handlingSpecs: "GlobalGAP & APEDA Certified Cold Chain Shipment"
@@ -45,7 +45,7 @@ export const productsData: ProductItem[] = [
     category: "Fresh Fruits & Agri",
     name: "Export Quality Fresh Pink Guava",
     description: "All grades available. Starting from just $1.54/kg (30% below international market rate). Farm-fresh tropical guavas with delicious pink pulp.",
-    image: "/images/guava.jpg",
+    image: "/images/guava.webp",
     hsCodeRange: "0804 - 5010",
     topDestinations: ["UAE", "Kuwait", "Qatar", "Oman", "Singapore"],
     handlingSpecs: "Shock-absorbent Protective Foam Grid Packaging"
@@ -55,7 +55,7 @@ export const productsData: ProductItem[] = [
     category: "Fresh Fruits & Agri",
     name: "Premium Sweet Green & Dark Grapes",
     description: "All grades available. Starting from just $1.96/kg (30% below international market rate). Crisp seedless green and dark purple grapes.",
-    image: "/images/grapes.jpg",
+    image: "/images/grapes.webp",
     hsCodeRange: "0806 - 1000",
     topDestinations: ["UK", "Germany", "Netherlands", "Canada", "UAE"],
     handlingSpecs: "Sulphur Pad Protected & 0°C Cold Chain Transit"
@@ -65,7 +65,7 @@ export const productsData: ProductItem[] = [
     category: "Nuts & Superfoods",
     name: "Organic Popped Makhana (Fox Nuts)",
     description: "All grades available. Starting from just $8.40/kg (30% below international market rate). Premium quality roasted white makhana lotus seeds.",
-    image: "/images/makhana.jpg",
+    image: "/images/makhana.webp",
     hsCodeRange: "1904 - 1090",
     topDestinations: ["USA", "UK", "Australia", "Canada", "Singapore"],
     handlingSpecs: "Nitrogen-flushed Moisture-proof Vacuum Packaging"

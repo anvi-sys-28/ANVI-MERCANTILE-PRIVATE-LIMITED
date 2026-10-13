@@ -7,37 +7,37 @@ import CountUp from '@/components/ui/CountUp';
 
 const CAROUSEL_SLIDES = [
   {
-    image: "/images/green_chilly.jpg",
+    image: "/images/green_chilly.webp",
     title: "Fresh Premium Green Chilly",
     caption: "All grades available. Starting from just $1.26/kg (30% below international market rate).",
     alt: "Fresh Premium Green Chilly export",
   },
   {
-    image: "/images/pomegranate.jpg",
+    image: "/images/pomegranate.webp",
     title: "Fresh Ruby Pomegranates",
     caption: "All grades available. Starting from just $2.45/kg (30% below international market rate).",
     alt: "Fresh Pomegranates export",
   },
   {
-    image: "/images/onion.jpg",
+    image: "/images/onion.webp",
     title: "Farm Fresh Onions",
     caption: "All grades available. Starting from just $0.56/kg (30% below international market rate).",
     alt: "Fresh Onions export",
   },
   {
-    image: "/images/makhana.jpg",
+    image: "/images/makhana.webp",
     title: "Organic Popped Makhana",
     caption: "All grades available. Starting from just $8.40/kg (30% below international market rate).",
     alt: "Organic Makhana export",
   },
   {
-    image: "/images/guava.jpg",
+    image: "/images/guava.webp",
     title: "Fresh Pink Guava",
     caption: "All grades available. Starting from just $1.54/kg (30% below international market rate).",
     alt: "Fresh Guava export",
   },
   {
-    image: "/images/grapes.jpg",
+    image: "/images/grapes.webp",
     title: "Sweet Seedless Grapes",
     caption: "All grades available. Starting from just $1.96/kg (30% below international market rate).",
     alt: "Fresh Grapes export",
@@ -96,10 +96,10 @@ export function HeroSection() {
             transition={{ duration: 0.8 }}
             className="relative w-full min-h-screen pt-28 lg:pt-36 pb-16 flex flex-col justify-between"
           >
-            {/* b.png Background Image */}
+            {/* b.webp Background Image */}
             <div className="absolute inset-0 z-0 overflow-hidden">
               <img
-                src="/b.png"
+                src="/b.webp"
                 alt="Anvi Mercantile Ocean Cargo Ship"
                 width="2400"
                 height="1400"

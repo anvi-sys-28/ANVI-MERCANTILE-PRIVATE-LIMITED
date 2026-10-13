@@ -82,7 +82,7 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
 
               <Link to="/" className="flex items-center gap-2.5 group">
                 <img
-                  src="/a.png"
+                  src="/bs.png"
                   alt="Anvi Mercantile Logo"
                   className="h-8 sm:h-9 w-auto object-contain rounded shrink-0 group-hover:scale-105 transition-transform"
                 />
@@ -199,7 +199,7 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
                   <span>CLOSE</span>
                 </button>
                 <div className="hidden sm:flex items-center gap-2.5 pl-4 border-l border-white/15">
-                  <img src="/ll.png" alt="Logo" className="h-6 w-auto object-contain" />
+                  <img src="/bs.png" alt="Logo" className="h-6 w-auto object-contain rounded" />
                   <span className="font-extrabold text-sm text-white tracking-wider uppercase font-headline">
                     ANVI MERCANTILE PRIVATE LIMITED
                   </span>

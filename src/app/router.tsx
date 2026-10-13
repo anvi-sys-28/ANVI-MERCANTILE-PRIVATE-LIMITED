@@ -1,20 +1,35 @@
+import { lazy, Suspense } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import { Layout } from '@/app/Layout';
 
-// Direct static imports to eliminate any loading screens or chunk fetch delays
+// Immediate static import for HomePage to ensure zero-delay first paint
 import HomePage from '@/pages/HomePage';
-import ServicesPage from '@/pages/ServicesPage';
-import ServiceDetailPage from '@/pages/ServiceDetailPage';
-import TradePage from '@/pages/TradePage';
-import AboutPage from '@/pages/AboutPage';
-import TrackPage from '@/pages/TrackPage';
-import QuotePage from '@/pages/QuotePage';
-import ContactPage from '@/pages/ContactPage';
-import InsightsPage from '@/pages/InsightsPage';
-import InsightDetailPage from '@/pages/InsightDetailPage';
-import PrivacyPage from '@/pages/PrivacyPage';
-import TermsPage from '@/pages/TermsPage';
-import NotFoundPage from '@/pages/NotFoundPage';
+
+// Code-split secondary routes to shrink initial bundle and accelerate first-time visitor load
+const ServicesPage = lazy(() => import('@/pages/ServicesPage'));
+const ServiceDetailPage = lazy(() => import('@/pages/ServiceDetailPage'));
+const TradePage = lazy(() => import('@/pages/TradePage'));
+const AboutPage = lazy(() => import('@/pages/AboutPage'));
+const TrackPage = lazy(() => import('@/pages/TrackPage'));
+const QuotePage = lazy(() => import('@/pages/QuotePage'));
+const ContactPage = lazy(() => import('@/pages/ContactPage'));
+const InsightsPage = lazy(() => import('@/pages/InsightsPage'));
+const InsightDetailPage = lazy(() => import('@/pages/InsightDetailPage'));
+const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
+const TermsPage = lazy(() => import('@/pages/TermsPage'));
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
+
+const PageLoader = () => (
+  <div className="min-h-[60vh] flex items-center justify-center">
+    <div className="w-8 h-8 border-2 border-sky-400 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+
+const withSuspense = (Component: React.ComponentType) => (
+  <Suspense fallback={<PageLoader />}>
+    <Component />
+  </Suspense>
+);
 
 export const router = createBrowserRouter([
   {
@@ -27,51 +42,51 @@ export const router = createBrowserRouter([
       },
       {
         path: 'services',
-        element: <ServicesPage />,
+        element: withSuspense(ServicesPage),
       },
       {
         path: 'services/:slug',
-        element: <ServiceDetailPage />,
+        element: withSuspense(ServiceDetailPage),
       },
       {
         path: 'trade',
-        element: <TradePage />,
+        element: withSuspense(TradePage),
       },
       {
         path: 'about',
-        element: <AboutPage />,
+        element: withSuspense(AboutPage),
       },
       {
         path: 'track',
-        element: <TrackPage />,
+        element: withSuspense(TrackPage),
       },
       {
         path: 'quote',
-        element: <QuotePage />,
+        element: withSuspense(QuotePage),
       },
       {
         path: 'contact',
-        element: <ContactPage />,
+        element: withSuspense(ContactPage),
       },
       {
         path: 'insights',
-        element: <InsightsPage />,
+        element: withSuspense(InsightsPage),
       },
       {
         path: 'insights/:slug',
-        element: <InsightDetailPage />,
+        element: withSuspense(InsightDetailPage),
       },
       {
         path: 'privacy',
-        element: <PrivacyPage />,
+        element: withSuspense(PrivacyPage),
       },
       {
         path: 'terms',
-        element: <TermsPage />,
+        element: withSuspense(TermsPage),
       },
       {
         path: '*',
-        element: <NotFoundPage />,
+        element: withSuspense(NotFoundPage),
       },
     ],
   },

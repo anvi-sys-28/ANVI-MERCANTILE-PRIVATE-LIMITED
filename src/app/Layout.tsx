@@ -8,12 +8,30 @@ import { ScrollToTop } from '@/app/ScrollToTop';
 import { IntroSplashScreen } from '@/components/global/IntroSplashScreen';
 
 export function Layout() {
-  const [showIntro, setShowIntro] = useState(true);
+  const [showIntro, setShowIntro] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return !sessionStorage.getItem('anvi_intro_seen');
+      } catch {
+        return true;
+      }
+    }
+    return true;
+  });
+
+  const handleIntroComplete = () => {
+    setShowIntro(false);
+    try {
+      sessionStorage.setItem('anvi_intro_seen', 'true');
+    } catch {
+      // ignore
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col justify-between bg-[#030712] text-white relative">
       {/* Intro Opening Animation */}
-      {showIntro && <IntroSplashScreen onComplete={() => setShowIntro(false)} />}
+      {showIntro && <IntroSplashScreen onComplete={handleIntroComplete} />}
 
       <ScrollToTop />
       
