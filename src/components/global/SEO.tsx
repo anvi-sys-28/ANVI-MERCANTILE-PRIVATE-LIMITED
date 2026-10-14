@@ -16,7 +16,7 @@ export function SEO({
   description = "By ANVI GROUPS — India's premier fresh fruits and agricultural commodities exporters. Farm-direct ruby pomegranates, sweet seedless grapes, pink guavas, onions & green chillies. Bulk export MOQ 10 MT.",
   keywords = "fresh fruits exporters, fresh fruits exporters in india, fresh produce exporters, bulk fruit export suppliers, pomegranate exporters india, fresh grapes export, vegetable exporters india, agricultural commodity export, anvi mercantile, anvi groups, global fruit suppliers, reefer fruit shipment",
   canonical,
-  ogImage = 'https://www.anvimercantile.in/bs.png',
+  ogImage = 'https://www.anvimercantile.in/bs.png?v=20261014',
   ogType = 'website',
   schema,
 }: SEOProps) {
@@ -29,9 +29,9 @@ export function SEO({
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords} />
       <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-      <link rel="icon" type="image/png" href="/bs.png?v=20261013" />
-      <link rel="shortcut icon" href="/bs.png?v=20261013" />
-      <link rel="apple-touch-icon" href="/bs.png?v=20261013" />
+      <link rel="icon" type="image/png" href="/bs.png?v=20261014" />
+      <link rel="shortcut icon" href="/bs.png?v=20261014" />
+      <link rel="apple-touch-icon" href="/bs.png?v=20261014" />
 
       {/* Open Graph */}
       <meta property="og:title" content={fullTitle} />
@@ -39,6 +39,11 @@ export function SEO({
       <meta property="og:type" content={ogType} />
       <meta property="og:url" content={url} />
       <meta property="og:image" content={ogImage} />
+      <meta property="og:image:secure_url" content={ogImage} />
+      <meta property="og:image:type" content="image/png" />
+      <meta property="og:image:width" content="600" />
+      <meta property="og:image:height" content="600" />
+      <meta property="og:image:alt" content="ANVI MERCANTILE PRIVATE LIMITED - By ANVI GROUPS" />
       <meta property="og:site_name" content={siteConfig.name} />
 
       {/* Twitter */}
