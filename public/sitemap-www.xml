@@ -3,9 +3,14 @@
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://www.anvimercantile.com/</loc>
-    <lastmod>2026-10-13</lastmod>
+    <lastmod>2026-10-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://www.anvimercantile.com/images/rice.webp</image:loc>
+      <image:title>Premium Indian Basmati Rice Exporters India - ANVI Mercantile</image:title>
+      <image:caption>Export grade aromatic long-grain Indian Basmati rice. 1121 Steam, Sella and Traditional varieties. Minimum order quantity 10 MT.</image:caption>
+    </image:image>
     <image:image>
       <image:loc>https://www.anvimercantile.com/images/pomegranate.webp</image:loc>
       <image:title>Fresh Ruby Pomegranates Exporters India - ANVI Mercantile</image:title>

@@ -7,6 +7,12 @@ import CountUp from '@/components/ui/CountUp';
 
 const CAROUSEL_SLIDES = [
   {
+    image: "/images/rice.webp",
+    title: "Premium Indian Basmati Rice",
+    caption: "All grades available (1121, Traditional & Pusa). Starting from just $0.98/kg (30% below international market rate).",
+    alt: "Premium Indian Basmati Rice export",
+  },
+  {
     image: "/images/green_chilly.webp",
     title: "Fresh Premium Green Chilly",
     caption: "All grades available. Starting from just $1.26/kg (30% below international market rate).",
@@ -198,7 +204,7 @@ export function HeroSection() {
                 className="pt-12"
               >
                 <p className="text-xs sm:text-sm text-white/80 max-w-lg font-normal leading-relaxed">
-                  Exporting premium quality agricultural commodities — including red chilly, red & golden onions, ruby pomegranates, pink guavas, sweet grapes, and organic makhana — delivered reliably across international trade routes.
+                  Exporting premium quality agricultural commodities — including premium Indian Basmati rice, fresh green chilly, red &amp; golden onions, ruby pomegranates, pink guavas, sweet grapes, and organic makhana — delivered reliably across international trade routes.
                 </p>
               </motion.div>
 

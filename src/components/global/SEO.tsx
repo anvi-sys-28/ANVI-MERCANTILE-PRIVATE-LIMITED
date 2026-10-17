@@ -13,8 +13,8 @@ interface SEOProps {
 
 export function SEO({
   title,
-  description = "By ANVI GROUPS — India's premier fresh fruits and agricultural commodities exporters. Farm-direct ruby pomegranates, sweet seedless grapes, pink guavas, onions & green chillies. Bulk export MOQ 10 MT.",
-  keywords = "fresh fruits exporters, fresh fruits exporters in india, fresh produce exporters, bulk fruit export suppliers, pomegranate exporters india, fresh grapes export, vegetable exporters india, agricultural commodity export, anvi mercantile, anvi groups, global fruit suppliers, reefer fruit shipment",
+  description = "By ANVI GROUPS — India's premier fresh fruits and agricultural commodities exporters. Farm-direct premium Basmati rice, ruby pomegranates, sweet seedless grapes, pink guavas, onions & green chillies. Bulk export MOQ 10 MT.",
+  keywords = "basmati rice exporters, indian rice exporters, fresh fruits exporters, fresh fruits exporters in india, fresh produce exporters, bulk fruit export suppliers, pomegranate exporters india, fresh grapes export, vegetable exporters india, agricultural commodity export, anvi mercantile, anvi groups, global fruit suppliers, reefer fruit shipment",
   canonical,
   ogImage = 'https://www.anvimercantile.in/bs.png?v=20261014',
   ogType = 'website',

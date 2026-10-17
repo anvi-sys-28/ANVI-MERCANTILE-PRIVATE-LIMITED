@@ -11,6 +11,16 @@ export interface ProductItem {
 
 export const productsData: ProductItem[] = [
   {
+    id: "rice",
+    category: "Agri Commodities",
+    name: "Premium Long-Grain Basmati Rice",
+    description: "All grades available (1121 Steam, Sella, Golden & Pusa). Starting from just $0.98/kg (30% below international market rate). Aromatic extra-long grains with superior elongation.",
+    image: "/images/rice.webp",
+    hsCodeRange: "1006 - 3020",
+    topDestinations: ["Saudi Arabia", "UAE", "Iran", "Iraq", "USA", "UK"],
+    handlingSpecs: "FSSAI & APEDA Certified, Non-GMO, Moisture-proof BOPP Bags"
+  },
+  {
     id: "chilly",
     category: "Spices & Foodstuff",
     name: "Premium Fresh Green Chilly",

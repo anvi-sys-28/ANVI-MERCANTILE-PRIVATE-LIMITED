@@ -20,6 +20,7 @@ interface StickyScrollFeatureSectionProps {
 }
 
 const PRODUCE_ITEMS = [
+  'PREMIUM BASMATI RICE',
   'FRESH GREEN CHILLI',
   'RED & GOLDEN ONIONS',
   'RUBY POMEGRANATES',
