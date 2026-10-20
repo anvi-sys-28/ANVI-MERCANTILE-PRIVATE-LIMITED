@@ -247,7 +247,7 @@ export function HeroSection() {
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="absolute z-30 top-24 sm:top-28 lg:top-32 left-4 sm:left-6 lg:left-12"
+              className="absolute z-30 top-20 sm:top-24 lg:top-28 left-4 sm:left-6 lg:left-12"
             >
               <QuickOrderBox position="left" />
             </motion.div>
