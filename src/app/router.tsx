@@ -95,6 +95,10 @@ export const router = createBrowserRouter([
         element: withSuspense(TermsPage),
       },
       {
+        path: 'admin',
+        element: withSuspense(AdminDashboardPage),
+      },
+      {
         path: '*',
         element: withSuspense(NotFoundPage),
       },
