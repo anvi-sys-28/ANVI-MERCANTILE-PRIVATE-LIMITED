@@ -145,4 +145,80 @@ export const api = {
   async getMe() {
     return apiRequest<{ data: any }>('/auth/me');
   },
+
+  // Orders & Tracking
+  async getOrder(id: string) {
+    return apiRequest<{ data: any }>(`/orders/${id}`);
+  },
+
+  async listOrders() {
+    return apiRequest<{ data: any[] }>('/orders');
+  },
+
+  async transitionOrderStatus(id: string, toStatus: string, note?: string) {
+    return apiRequest<{ data: any }>(`/orders/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ toStatus, note }),
+    });
+  },
+
+  // Bank & Payments
+  async getBankInstructions() {
+    return apiRequest<{ data: any }>('/payments/instructions');
+  },
+
+  async submitPayment(orderId: string, payload: {
+    type?: string;
+    amount: number;
+    currency?: string;
+    method: string;
+    referenceNo: string;
+    proofFileName?: string;
+    proofFileData?: string;
+    proofMimeType?: string;
+  }) {
+    return apiRequest<{ data: any; message: string }>(`/orders/${orderId}/payments`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async getOrderPayments(orderId: string) {
+    return apiRequest<{ data: any[] }>(`/orders/${orderId}/payments`);
+  },
+
+  // Documents
+  async getOrderDocuments(orderId: string) {
+    return apiRequest<{ data: any[] }>(`/orders/${orderId}/documents`);
+  },
+
+  async uploadOrderDocument(orderId: string, payload: {
+    kind: string;
+    fileName: string;
+    fileData: string;
+    mimeType: string;
+    visibility?: string;
+  }) {
+    return apiRequest<{ data: any; message: string }>(`/orders/${orderId}/documents`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  // Threads & Messages
+  async getOrderThread(orderId: string) {
+    return apiRequest<{ data: any }>(`/threads/order/${orderId}`);
+  },
+
+  async getRfqThread(rfqId: string) {
+    return apiRequest<{ data: any }>(`/threads/rfq/${rfqId}`);
+  },
+
+  async sendThreadMessage(threadId: string, payload: { body: string; attachments?: any[] }) {
+    return apiRequest<{ data: any }>(`/threads/${threadId}/messages`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
 };
+

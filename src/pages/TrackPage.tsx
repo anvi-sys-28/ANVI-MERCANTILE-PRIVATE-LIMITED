@@ -277,6 +277,7 @@ export default function TrackPage() {
           </div>
 
           {/* Vertical Milestone Timeline */}
+          {/* Consignment Milestones & Cold Chain Custody */}
           <div className="bg-white rounded-2xl border border-[#0b3a40]/10 shadow-sm p-6 sm:p-8 space-y-6">
             <div className="flex items-center justify-between pb-4 border-b border-[#0b3a40]/10">
               <h3 className="text-lg font-bold font-headline uppercase text-[#0b3a40]">
@@ -325,6 +326,91 @@ export default function TrackPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Export Trade Documents & Phytosanitary Certificates */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="bg-white rounded-2xl border border-[#0b3a40]/10 shadow-sm p-6 sm:p-8 space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-[#0b3a40]/10">
+                <div className="flex items-center gap-2">
+                  <FileCheck className="w-5 h-5 text-[#0f5c66]" />
+                  <h3 className="text-base font-bold font-headline uppercase text-[#0b3a40]">
+                    Official Export Documents
+                  </h3>
+                </div>
+                <span className="text-[11px] font-bold text-[#c9a46b] uppercase bg-[#c9a46b]/10 px-2.5 py-1 rounded">
+                  APEDA & Customs Cleared
+                </span>
+              </div>
+              <p className="text-xs text-gray-600">
+                Official documents verified for customs clearance at destination port.
+              </p>
+
+              <div className="space-y-3">
+                {[
+                  { title: 'Bill of Lading (Clean on Board)', ref: trackingData.blNumber, type: 'PDF' },
+                  { title: 'APEDA Phytosanitary Certificate', ref: 'PSC-IN-2026-98124', type: 'PDF' },
+                  { title: 'Certificate of Origin (Non-Preferential)', ref: 'COO-MUM-2026-081', type: 'PDF' },
+                  { title: 'Export Commercial Invoice & Packing List', ref: `INV-${trackingData.orderNumber}`, type: 'PDF' },
+                ].map((doc, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-3.5 rounded-xl border border-gray-100 bg-[#fbfaf8] hover:border-[#0f5c66]/30 transition-colors"
+                  >
+                    <div>
+                      <h4 className="text-xs font-bold text-[#0b3a40] font-headline">{doc.title}</h4>
+                      <span className="text-[10px] text-gray-500 font-mono">Ref: {doc.ref}</span>
+                    </div>
+                    <span className="text-xs font-bold text-[#0f5c66] hover:text-[#c9a46b] transition-colors flex items-center gap-1 cursor-pointer">
+                      Download
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Wire Transfer & Treasury Settlement */}
+            <div className="bg-white rounded-2xl border border-[#0b3a40]/10 shadow-sm p-6 sm:p-8 space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-[#0b3a40]/10">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-[#c9a46b]" />
+                  <h3 className="text-base font-bold font-headline uppercase text-[#0b3a40]">
+                    Payment & Wire Details
+                  </h3>
+                </div>
+                <span className="text-[11px] font-bold text-emerald-800 uppercase bg-emerald-50 px-2.5 py-1 rounded">
+                  {trackingData.currentStatus.includes('Payment Pending') ? 'Payment Required' : 'Payment Settled'}
+                </span>
+              </div>
+
+              <div className="bg-[#fbfaf8] rounded-xl p-4 border border-gray-100 space-y-2 text-xs">
+                <div className="flex justify-between py-1 border-b border-gray-200/50">
+                  <span className="text-gray-500">Beneficiary:</span>
+                  <span className="font-bold text-[#0b3a40]">ANVI MERCANTILE PRIVATE LIMITED</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-gray-200/50">
+                  <span className="text-gray-500">Bank Name:</span>
+                  <span className="font-semibold text-gray-800">HDFC Bank Ltd, Mumbai, India</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-gray-200/50">
+                  <span className="text-gray-500">SWIFT / BIC Code:</span>
+                  <span className="font-mono font-bold text-[#0f5c66]">HDFCINBBXXX</span>
+                </div>
+                <div className="flex justify-between py-1">
+                  <span className="text-gray-500">Account / IBAN:</span>
+                  <span className="font-mono font-semibold text-gray-800">923020054781293</span>
+                </div>
+              </div>
+
+              <div className="p-3 bg-[#0b3a40]/5 rounded-xl text-xs text-[#0b3a40] space-y-1">
+                <p className="font-bold font-headline uppercase text-[11px] text-[#c9a46b]">
+                  Remittance Instructions
+                </p>
+                <p className="text-[11px] text-gray-600">
+                  Please quote Order Number <span className="font-mono font-bold text-[#0b3a40]">{trackingData.orderNumber}</span> in Field 70 of your SWIFT MT103 wire transfer.
+                </p>
+              </div>
             </div>
           </div>
 
