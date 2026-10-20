@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react';
 import { SEO } from '@/components/global/SEO';
-import { tradeRoutesData } from '@/data/tradeRoutesData';
 import { productsData } from '@/data/productsData';
 import { api, type CatalogProduct } from '@/lib/api';
 import {
   Search,
-  MapPin,
-  FileText,
   ArrowRight,
   ShieldCheck,
   Scale,
@@ -16,7 +13,6 @@ import { Link } from 'react-router-dom';
 import { FinalCtaSection } from '@/components/sections/FinalCtaSection';
 
 export default function TradePage() {
-  const [routeCategory, setRouteCategory] = useState<string>('ALL');
   const [productCategory, setProductCategory] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedIncoterm, setSelectedIncoterm] = useState<string>('ALL');
@@ -102,15 +98,6 @@ export default function TradePage() {
     return () => clearTimeout(timer);
   }, [searchQuery, selectedIncoterm]);
 
-  const filteredRoutes = tradeRoutesData.filter((route) => {
-    const matchesCategory = routeCategory === 'ALL' || route.category === routeCategory;
-    const matchesSearch =
-      route.origin.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      route.destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      route.topProducts.some((p) => p.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesCategory && matchesSearch;
-  });
-
   const filteredProducts = dbProducts.filter((product) => {
     const matchesCategory =
       productCategory === 'ALL' ||
@@ -173,126 +160,7 @@ export default function TradePage() {
         </div>
       </section>
 
-      {/* Section 1: Trade Corridors Matrix */}
-      <section className="py-20 bg-[#f7f5f0] border-b border-[#0b3a40]/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-          
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <span className="text-[#c9a46b] text-xs font-bold font-headline uppercase tracking-widest block">
-                MARITIME & AIR LANES
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-bold font-headline uppercase text-[#0b3a40]">
-                KEY TRADE ROUTES & TRANSIT LEAD TIMES
-              </h2>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {[
-                { label: 'ALL ROUTES', val: 'ALL' },
-                { label: 'ASIA - MIDDLE EAST', val: 'Asia-MiddleEast' },
-                { label: 'INTRA-ASIA', val: 'IntraAsia' },
-                { label: 'ASIA - NORTH AMERICA', val: 'Asia-NorthAmerica' },
-                { label: 'ASIA - EUROPE', val: 'Asia-Europe' },
-              ].map((btn) => (
-                <button
-                  key={btn.val}
-                  onClick={() => setRouteCategory(btn.val)}
-                  className={`px-3 py-1.5 rounded text-xs font-bold font-headline uppercase tracking-wider transition-all ${
-                    routeCategory === btn.val
-                      ? 'bg-[#0b3a40] text-[#c9a46b] shadow'
-                      : 'bg-white text-[#0b3a40] border border-[#0b3a40]/10 hover:border-[#c9a46b]'
-                  }`}
-                >
-                  {btn.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {filteredRoutes.map((route) => (
-              <div
-                key={route.id}
-                className="bg-white rounded-xl p-6 border border-[#0b3a40]/10 shadow-sm hover:shadow-lg transition-all space-y-6 flex flex-col justify-between"
-              >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between pb-3 border-b border-[#0b3a40]/10">
-                    <div className="flex items-center gap-2 text-[#0b3a40]">
-                      <MapPin className="w-5 h-5 text-[#c9a46b] shrink-0" />
-                      <h3 className="font-extrabold font-headline text-lg uppercase">
-                        {route.origin} ➔ {route.destination}
-                      </h3>
-                    </div>
-                    <span className="text-[10px] font-bold font-headline uppercase bg-[#f7f5f0] text-[#0f5c66] px-2.5 py-1 rounded border border-[#0f5c66]/20">
-                      {route.frequency}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3 bg-[#f7f5f0] p-3 rounded-lg text-xs">
-                    <div>
-                      <span className="text-gray-500 text-[10px] uppercase block font-semibold">Sea Freight Lead Time</span>
-                      <span className="font-bold text-[#0b3a40]">{route.seaTransitDays}</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500 text-[10px] uppercase block font-semibold">Air Cargo Express</span>
-                      <span className="font-bold text-[#0f5c66]">{route.airTransitDays}</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <span className="text-[11px] font-bold font-headline uppercase text-[#c9a46b]">
-                      Key Ports Served
-                    </span>
-                    <p className="text-xs text-[#1a1f23]/80">
-                      {route.keyPorts.join(' • ')}
-                    </p>
-                  </div>
-
-                  <div className="space-y-1">
-                    <span className="text-[11px] font-bold font-headline uppercase text-[#c9a46b]">
-                      Top Commodities Shipped
-                    </span>
-                    <p className="text-xs text-[#1a1f23]/80">
-                      {route.topProducts.join(', ')}
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <span className="text-[11px] font-bold font-headline uppercase text-[#0b3a40] flex items-center gap-1">
-                      <FileText className="w-3.5 h-3.5 text-[#c9a46b]" />
-                      Compulsory Customs Documents
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {route.requiredDocs.map((doc, dIdx) => (
-                        <span
-                          key={dIdx}
-                          className="bg-[#0b3a40]/5 text-[#0b3a40] text-[10px] font-medium px-2 py-0.5 rounded border border-[#0b3a40]/10"
-                        >
-                          {doc}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-[#0b3a40]/10">
-                  <Link
-                    to={`/quote?origin=${encodeURIComponent(route.origin)}&destination=${encodeURIComponent(route.destination)}`}
-                    className="w-full inline-flex items-center justify-center gap-2 bg-[#0b3a40] hover:bg-[#0f5c66] text-white text-xs font-bold font-headline uppercase py-2.5 rounded shadow transition-colors"
-                  >
-                    <span>Request Rate for this Route</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-[#c9a46b]" />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-
-        </div>
-      </section>
-
-      {/* Section 2: Product Catalog Grid with B2B Bulk Marketplace Gating */}
+      {/* Product Catalog Grid with B2B Bulk Marketplace Gating */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           

@@ -4,48 +4,49 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import InkBlotCarousel from '@/components/ui/ink-blot-carousel';
 import CountUp from '@/components/ui/CountUp';
+import { QuickOrderBox } from '@/components/home/QuickOrderBox';
 
 const CAROUSEL_SLIDES = [
   {
-    image: "/images/rice.webp",
-    title: "Premium Indian Basmati Rice",
-    caption: "All grades available (1121, Traditional & Pusa). Starting from just $0.98/kg (30% below international market rate).",
-    alt: "Premium Indian Basmati Rice export",
-  },
-  {
     image: "/images/green_chilly.webp",
     title: "Fresh Premium Green Chilly",
-    caption: "All grades available. Starting from just $1.26/kg (30% below international market rate).",
+    caption: "Export Grade G4 / Jwala pungent green chillies direct from Maharashtra farms. Starting from $1.26/kg (MOQ 10 MT).",
     alt: "Fresh Premium Green Chilly export",
   },
   {
     image: "/images/pomegranate.webp",
     title: "Fresh Ruby Pomegranates",
-    caption: "All grades available. Starting from just $2.45/kg (30% below international market rate).",
+    caption: "Bhagwa variety, Brix 16%+, export graded in 3.5kg / 5kg ventilated CFB cartons. Starting from $2.45/kg.",
     alt: "Fresh Pomegranates export",
   },
   {
+    image: "/images/rice.webp",
+    title: "Premium Indian Basmati Rice",
+    caption: "Traditional 1121 XXL Steam & Sella Basmati. Starting from $0.98/kg (MOQ 25 MT FCL).",
+    alt: "Premium Indian Basmati Rice export",
+  },
+  {
     image: "/images/onion.webp",
-    title: "Farm Fresh Onions",
-    caption: "All grades available. Starting from just $0.56/kg (30% below international market rate).",
+    title: "Farm Fresh Nashik Red Onions",
+    caption: "Garwa / Summer crop fresh red onions (45mm - 55mm+). Starting from $0.48/kg in mesh bags.",
     alt: "Fresh Onions export",
   },
   {
     image: "/images/makhana.webp",
     title: "Organic Popped Makhana",
-    caption: "All grades available. Starting from just $8.40/kg (30% below international market rate).",
+    caption: "Jumbo handpicked foxnuts (4 to 6+ sutta), naturally organic & gluten-free. Starting from $8.40/kg.",
     alt: "Organic Makhana export",
   },
   {
     image: "/images/guava.webp",
-    title: "Fresh Pink Guava",
-    caption: "All grades available. Starting from just $1.54/kg (30% below international market rate).",
+    title: "Fresh Pink Guavas",
+    caption: "Taiwan Pink / VNR variety, crisp texture and aromatic sweet pulp. Starting from $1.15/kg.",
     alt: "Fresh Guava export",
   },
   {
     image: "/images/grapes.webp",
     title: "Sweet Seedless Grapes",
-    caption: "All grades available. Starting from just $1.96/kg (30% below international market rate).",
+    caption: "Thompson Seedless export grade, Berry size 16mm-18mm+. Starting from $1.85/kg.",
     alt: "Fresh Grapes export",
   },
 ];
@@ -54,7 +55,7 @@ export function HeroSection() {
   const [showCarousel, setShowCarousel] = useState(false);
   const [countdown, setCountdown] = useState(10);
 
-  // 10-Second Live Integer Countdown (10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+  // 10-Second Live Integer Countdown (10 -> 0)
   useEffect(() => {
     if (showCarousel) return;
 
@@ -75,7 +76,7 @@ export function HeroSection() {
   return (
     <div className="relative w-full min-h-screen bg-black text-white overflow-hidden font-sans">
       
-      {/* Plain Live Number Countdown without box or text overlay */}
+      {/* Countdown Indicator during first 10 seconds */}
       <AnimatePresence mode="wait">
         {!showCarousel && (
           <motion.div
@@ -84,16 +85,21 @@ export function HeroSection() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.88 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-24 sm:top-28 right-6 lg:right-12 z-30 font-sans font-extrabold text-3xl sm:text-5xl text-white drop-shadow-md select-none pointer-events-none"
+            className="absolute top-24 sm:top-28 right-6 lg:right-12 z-40 font-sans text-right select-none pointer-events-none"
           >
-            {countdown}
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#c9a46b] block">
+              Agri Catalog in
+            </span>
+            <span className="font-extrabold text-3xl sm:text-4xl text-white drop-shadow-md">
+              {countdown}s
+            </span>
           </motion.div>
         )}
       </AnimatePresence>
 
       <AnimatePresence mode="wait">
         {!showCarousel ? (
-          /* CLEAN & PROFESSIONAL HERO UI */
+          /* STATE 1: OCEAN CARGO SHIP (First 10 seconds) - ORDER BOX ON THE RIGHT SIDE */
           <motion.section
             key="standard-hero"
             initial={{ opacity: 0 }}
@@ -102,7 +108,7 @@ export function HeroSection() {
             transition={{ duration: 0.8 }}
             className="relative w-full min-h-screen pt-28 lg:pt-36 pb-16 flex flex-col justify-between"
           >
-            {/* b.webp Background Image */}
+            {/* b.webp Ocean Ship Background */}
             <div className="absolute inset-0 z-0 overflow-hidden">
               <img
                 src="/b.webp"
@@ -118,18 +124,16 @@ export function HeroSection() {
               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60 pointer-events-none" />
             </div>
 
-            {/* Main Center Container */}
-            <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 w-full my-auto flex flex-col justify-between min-h-[calc(100vh-180px)]">
+            {/* Main Center Container: Headline on Left, Ordering Box on Right */}
+            <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 w-full my-auto flex flex-col lg:flex-row items-center justify-between gap-10 min-h-[calc(100vh-180px)]">
               
-              {/* Upper Content: Headline + CTA & Social Proof */}
-              <div className="space-y-8 max-w-3xl pt-6 sm:pt-10">
-
-                {/* Main Headline */}
+              {/* Left Column: Headline, CTA & Social Proof */}
+              <div className="space-y-8 max-w-2xl pt-4 lg:pt-0">
                 <motion.h1
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.7, ease: 'easeOut' }}
-                  className="text-5xl sm:text-7xl lg:text-[82px] font-normal text-white tracking-tight leading-[1.04] font-sans"
+                  className="text-4xl sm:text-6xl lg:text-[76px] font-normal text-white tracking-tight leading-[1.04] font-sans"
                 >
                   Built for Oceans. <br />
                   Trusted by fleets.
@@ -142,18 +146,17 @@ export function HeroSection() {
                   transition={{ duration: 0.7, delay: 0.2 }}
                   className="flex flex-wrap items-center gap-5 pt-1"
                 >
-                  {/* Clean Pill Button */}
                   <Link
-                    to="/quote"
+                    to="/trade"
                     className="inline-flex items-center gap-3 bg-white hover:bg-slate-100 text-slate-950 font-medium text-xs sm:text-sm px-5 py-2.5 rounded-full shadow-lg transition-all transform hover:scale-105 group"
                   >
-                    <span>Get a Quote</span>
+                    <span>Browse Catalog</span>
                     <div className="w-5 h-5 rounded-full bg-slate-950 text-white flex items-center justify-center">
                       <ArrowRight className="w-3 h-3" />
                     </div>
                   </Link>
 
-                  {/* Social Proof Avatars + CountUp */}
+                  {/* Social Proof */}
                   <div className="flex items-center gap-2.5">
                     <div className="flex -space-x-2 overflow-hidden">
                       <img
@@ -194,24 +197,33 @@ export function HeroSection() {
                   </div>
                 </motion.div>
 
+                {/* Paragraph Description */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7, delay: 0.3 }}
+                  className="pt-6"
+                >
+                  <p className="text-xs sm:text-sm text-white/80 max-w-lg font-normal leading-relaxed">
+                    Exporting premium quality agricultural commodities — including premium Indian Basmati rice, fresh green chilly, red &amp; golden onions, ruby pomegranates, pink guavas, sweet grapes, and organic makhana — delivered reliably across international trade routes.
+                  </p>
+                </motion.div>
               </div>
 
-              {/* Lower Content: Paragraph Description at Bottom Left */}
+              {/* Right Column: ORDER BOX ON THE RIGHT SIDE */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.3 }}
-                className="pt-12"
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="w-full lg:w-auto flex justify-center lg:justify-end shrink-0"
               >
-                <p className="text-xs sm:text-sm text-white/80 max-w-lg font-normal leading-relaxed">
-                  Exporting premium quality agricultural commodities — including premium Indian Basmati rice, fresh green chilly, red &amp; golden onions, ruby pomegranates, pink guavas, sweet grapes, and organic makhana — delivered reliably across international trade routes.
-                </p>
+                <QuickOrderBox position="right" />
               </motion.div>
 
             </div>
           </motion.section>
         ) : (
-          /* INK BLOT CAROUSEL HERO UI (Featuring Pure White Text ink="#FFFFFF") */
+          /* STATE 2: PRODUCE CAROUSEL (After 10 seconds) - ORDER BOX SHIFTS TOWARDS THE LEFT SIDE */
           <motion.section
             key="carousel-hero"
             initial={{ opacity: 0, scale: 1.02 }}
@@ -220,6 +232,7 @@ export function HeroSection() {
             transition={{ duration: 0.8 }}
             className="relative w-full h-screen"
           >
+            {/* Background Ink Blot Carousel with Produce Slides */}
             <InkBlotCarousel
               slides={CAROUSEL_SLIDES}
               height="100vh"
@@ -228,6 +241,16 @@ export function HeroSection() {
               autoplay={5000}
               ink="#FFFFFF"
             />
+
+            {/* ORDER BOX ON THE LEFT SIDE */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="absolute z-30 top-24 sm:top-28 lg:top-32 left-4 sm:left-6 lg:left-12"
+            >
+              <QuickOrderBox position="left" />
+            </motion.div>
           </motion.section>
         )}
       </AnimatePresence>
