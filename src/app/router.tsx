@@ -9,6 +9,7 @@ import HomePage from '@/pages/HomePage';
 const ServicesPage = lazy(() => import('@/pages/ServicesPage'));
 const ServiceDetailPage = lazy(() => import('@/pages/ServiceDetailPage'));
 const TradePage = lazy(() => import('@/pages/TradePage'));
+const ProductDetailPage = lazy(() => import('@/pages/ProductDetailPage'));
 const AboutPage = lazy(() => import('@/pages/AboutPage'));
 const TrackPage = lazy(() => import('@/pages/TrackPage'));
 const QuotePage = lazy(() => import('@/pages/QuotePage'));
@@ -51,6 +52,14 @@ export const router = createBrowserRouter([
       {
         path: 'trade',
         element: withSuspense(TradePage),
+      },
+      {
+        path: 'trade/:slug',
+        element: withSuspense(ProductDetailPage),
+      },
+      {
+        path: 'products/:slug',
+        element: withSuspense(ProductDetailPage),
       },
       {
         path: 'about',

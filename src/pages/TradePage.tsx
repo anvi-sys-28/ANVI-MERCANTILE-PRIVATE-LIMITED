@@ -1,15 +1,106 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SEO } from '@/components/global/SEO';
 import { tradeRoutesData } from '@/data/tradeRoutesData';
 import { productsData } from '@/data/productsData';
-import { Search, MapPin, FileText, ArrowRight } from 'lucide-react';
+import { api, type CatalogProduct } from '@/lib/api';
+import {
+  Search,
+  MapPin,
+  FileText,
+  ArrowRight,
+  ShieldCheck,
+  Scale,
+  X,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { FinalCtaSection } from '@/components/sections/FinalCtaSection';
 
 export default function TradePage() {
   const [routeCategory, setRouteCategory] = useState<string>('ALL');
-  const [productCategory] = useState<string>('ALL');
+  const [productCategory, setProductCategory] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedIncoterm, setSelectedIncoterm] = useState<string>('ALL');
+
+  // Live database backed products with graceful fallback
+  const [dbProducts, setDbProducts] = useState<CatalogProduct[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState<boolean>(true);
+
+  // Comparison State
+  const [compareList, setCompareList] = useState<string[]>([]);
+  const [showCompareModal, setShowCompareModal] = useState<boolean>(false);
+  const [comparedProducts, setComparedProducts] = useState<CatalogProduct[]>([]);
+
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        setLoadingProducts(true);
+        const res = await api.getCatalog({
+          search: searchQuery || undefined,
+          incoterm: selectedIncoterm !== 'ALL' ? selectedIncoterm : undefined,
+        });
+        if (res.data && res.data.length > 0) {
+          setDbProducts(res.data);
+        } else {
+          // If empty in DB yet, fallback to local data
+          setDbProducts(
+            productsData.map((p) => ({
+              id: p.id,
+              name: p.name,
+              slug: p.id,
+              description: p.description,
+              originCountry: 'India',
+              harvestMonths: ['ALL_YEAR'],
+              packaging: p.handlingSpecs,
+              minOrderMt: 10,
+              pricePerMtUsd: 1450,
+              incoterms: ['FOB', 'CIF', 'CFR'],
+              certifications: ['APEDA', 'FSSAI'],
+              status: 'ACTIVE',
+              images: [{ fileKey: p.image, sortOrder: 0 }],
+              category: { id: p.id, name: p.category, slug: p.category.toLowerCase().replace(/ /g, '-') },
+              exporterCompany: {
+                id: 'comp-anvi',
+                legalName: 'ANVI MERCANTILE PRIVATE LIMITED',
+                country: 'India',
+                verificationStatus: 'VERIFIED',
+              },
+            }))
+          );
+        }
+      } catch {
+        // Fallback for offline / cold development
+        setDbProducts(
+          productsData.map((p) => ({
+            id: p.id,
+            name: p.name,
+            slug: p.id,
+            description: p.description,
+            originCountry: 'India',
+            harvestMonths: ['ALL_YEAR'],
+            packaging: p.handlingSpecs,
+            minOrderMt: 10,
+            pricePerMtUsd: 1450,
+            incoterms: ['FOB', 'CIF', 'CFR'],
+            certifications: ['APEDA', 'FSSAI'],
+            status: 'ACTIVE',
+            images: [{ fileKey: p.image, sortOrder: 0 }],
+            category: { id: p.id, name: p.category, slug: p.category.toLowerCase().replace(/ /g, '-') },
+            exporterCompany: {
+              id: 'comp-anvi',
+              legalName: 'ANVI MERCANTILE PRIVATE LIMITED',
+              country: 'India',
+              verificationStatus: 'VERIFIED',
+            },
+          }))
+        );
+      } finally {
+        setLoadingProducts(false);
+      }
+    }
+
+    const timer = setTimeout(fetchProducts, 200);
+    return () => clearTimeout(timer);
+  }, [searchQuery, selectedIncoterm]);
 
   const filteredRoutes = tradeRoutesData.filter((route) => {
     const matchesCategory = routeCategory === 'ALL' || route.category === routeCategory;
@@ -20,20 +111,37 @@ export default function TradePage() {
     return matchesCategory && matchesSearch;
   });
 
-  const filteredProducts = productsData.filter((product) => {
-    const matchesCategory = productCategory === 'ALL' || product.category === productCategory;
-    const matchesSearch =
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.hsCodeRange.includes(searchQuery);
-    return matchesCategory && matchesSearch;
+  const filteredProducts = dbProducts.filter((product) => {
+    const matchesCategory =
+      productCategory === 'ALL' ||
+      (product.category?.name && product.category.name.toLowerCase().includes(productCategory.toLowerCase()));
+    return matchesCategory;
   });
+
+  const toggleCompare = (idOrSlug: string) => {
+    setCompareList((prev) => {
+      if (prev.includes(idOrSlug)) {
+        return prev.filter((item) => item !== idOrSlug);
+      }
+      if (prev.length >= 4) {
+        alert('You can compare up to 4 commodities at a time.');
+        return prev;
+      }
+      return [...prev, idOrSlug];
+    });
+  };
+
+  const openComparisonModal = () => {
+    const matched = dbProducts.filter((p) => compareList.includes(p.id) || compareList.includes(p.slug));
+    setComparedProducts(matched);
+    setShowCompareModal(true);
+  };
 
   return (
     <>
       <SEO
-        title="Global Trade Routes & Product Catalog"
-        description="Comprehensive trade corridor lead times, customs documentation requirements, and product categories for international shipping."
+        title="Global Trade Routes & Product Catalog | Bulk Agro Export"
+        description="Live commodity export catalog with MOQ 10 MT, bulk pricing in USD, transit lead times, APEDA standards, and verified Indian exporters."
       />
 
       {/* Hero Header */}
@@ -54,7 +162,7 @@ export default function TradePage() {
             <div className="relative">
               <input
                 type="text"
-                placeholder="Search route (e.g. UAE, China), product, or HS code..."
+                placeholder="Search route (e.g. UAE, Europe), commodity, or variety..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-[#0f5c66] text-white placeholder-white/60 text-xs sm:text-sm px-4 py-3.5 pl-11 rounded-lg border border-white/20 focus:outline-none focus:border-[#c9a46b]"
@@ -184,74 +292,259 @@ export default function TradePage() {
         </div>
       </section>
 
-      {/* Section 2: Product Catalog Grid */}
+      {/* Section 2: Product Catalog Grid with B2B Bulk Marketplace Gating */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           
-          <div>
-            <span className="text-[#c9a46b] text-xs font-bold font-headline uppercase tracking-widest block">
-              CARGO SPECIFICATIONS
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-bold font-headline uppercase text-[#0b3a40]">
-              COMMODITY HANDLING CATALOG
-            </h2>
-          </div>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#0b3a40]/10">
+            <div>
+              <span className="text-[#c9a46b] text-xs font-bold font-headline uppercase tracking-widest block">
+                EXPORT COMMODITY INVENTORY
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold font-headline uppercase text-[#0b3a40]">
+                BULK PRODUCE & COMMODITY CATALOG
+              </h2>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                Verified Indian exporters • Minimum order quantity 10 MT • Cold chain reefer transit
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProducts.map((prod) => (
-              <div
-                key={prod.id}
-                className="bg-[#f7f5f0] rounded-xl overflow-hidden border border-[#0b3a40]/10 shadow-sm space-y-4"
-              >
-                <div className="relative h-48">
-                  <img
-                    src={prod.image}
-                    alt={prod.name}
-                    width="600"
-                    height="400"
-                    loading="lazy"
-                    className="w-full h-full object-cover"
-                  />
-                  <span className="absolute top-3 left-3 bg-[#0b3a40] text-[#c9a46b] text-[10px] font-bold font-headline uppercase px-2.5 py-1 rounded shadow">
-                    HS Code: {prod.hsCodeRange}
-                  </span>
-                </div>
-
-                <div className="p-6 space-y-3 pt-0">
-                  <span className="text-xs font-bold font-headline uppercase text-[#0f5c66]">
-                    {prod.category}
-                  </span>
-                  <h3 className="text-lg font-bold font-headline uppercase text-[#0b3a40]">
-                    {prod.name}
-                  </h3>
-                  <p className="text-xs text-[#1a1f23]/80 leading-relaxed">
-                    {prod.description}
-                  </p>
-
-                  <div className="space-y-1 pt-2 border-t border-[#0b3a40]/10 text-xs">
-                    <p>
-                      <span className="font-bold text-[#0b3a40]">Primary Trade Buyers:</span>{' '}
-                      {prod.topDestinations.join(', ')}
-                    </p>
-                    <p className="text-[11px] text-[#1a1f23]/70">
-                      <span className="font-bold text-[#c9a46b]">Handling Protocol:</span>{' '}
-                      {prod.handlingSpecs}
-                    </p>
-                  </div>
-
-                  <Link
-                    to={`/quote?product=${encodeURIComponent(prod.name)}`}
-                    className="w-full inline-flex items-center justify-center gap-1 bg-[#c9a46b] hover:bg-[#b59057] text-[#0b3a40] text-xs font-bold font-headline uppercase py-2.5 rounded shadow mt-2 transition-colors"
+            {/* Filter pills */}
+            <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3">
+              <div className="flex flex-wrap items-center gap-1.5">
+                {['ALL', 'Fruits', 'Commodities', 'Spices', 'Superfoods'].map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setProductCategory(cat)}
+                    className={`px-3 py-1 rounded text-xs font-bold uppercase transition-all ${
+                      productCategory === cat
+                        ? 'bg-[#0b3a40] text-[#c9a46b] shadow'
+                        : 'bg-[#f7f5f0] text-[#0b3a40] hover:bg-[#eae3de]'
+                    }`}
                   >
-                    <span>Inquire Cargo Freight</span>
-                  </Link>
-                </div>
+                    {cat}
+                  </button>
+                ))}
               </div>
-            ))}
+
+              <div className="flex flex-wrap items-center gap-1.5 border-t sm:border-t-0 sm:border-l border-[#0b3a40]/10 pt-2 sm:pt-0 sm:pl-3">
+                <span className="text-[11px] font-bold uppercase text-gray-500 mr-1">Terms:</span>
+                {['ALL', 'FOB', 'CIF', 'CFR'].map((term) => (
+                  <button
+                    key={term}
+                    onClick={() => setSelectedIncoterm(term)}
+                    className={`px-2.5 py-1 rounded text-xs font-bold uppercase transition-all ${
+                      selectedIncoterm === term
+                        ? 'bg-[#c9a46b] text-[#0b3a40] shadow'
+                        : 'bg-[#f7f5f0] text-[#0b3a40] hover:bg-[#eae3de]'
+                    }`}
+                  >
+                    {term}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
+
+          {loadingProducts ? (
+            <div className="py-12 flex justify-center">
+              <div className="w-8 h-8 border-2 border-[#0b3a40] border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredProducts.map((prod) => {
+                const imgUrl = prod.images?.[0]?.fileKey || '/images/pomegranate.webp';
+                const isCompared = compareList.includes(prod.id) || compareList.includes(prod.slug);
+
+                return (
+                  <div
+                    key={prod.id}
+                    className="bg-[#f7f5f0] rounded-xl overflow-hidden border border-[#0b3a40]/10 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                  >
+                    <div>
+                      {/* Image header */}
+                      <div className="relative h-48 bg-slate-900">
+                        <img
+                          src={imgUrl}
+                          alt={prod.name}
+                          width="600"
+                          height="400"
+                          loading="lazy"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-3 left-3 flex items-center gap-2">
+                          <span className="bg-[#0b3a40] text-[#c9a46b] text-[10px] font-bold font-headline uppercase px-2.5 py-1 rounded shadow">
+                            MOQ: {prod.minOrderMt} MT
+                          </span>
+                        </div>
+
+                        {/* Compare toggle button */}
+                        <button
+                          type="button"
+                          onClick={() => toggleCompare(prod.slug || prod.id)}
+                          className={`absolute top-3 right-3 text-[10px] font-bold font-headline uppercase px-2.5 py-1 rounded shadow flex items-center gap-1 transition-colors ${
+                            isCompared
+                              ? 'bg-[#c9a46b] text-[#0b3a40]'
+                              : 'bg-black/60 text-white hover:bg-black/80'
+                          }`}
+                        >
+                          <Scale className="w-3 h-3" />
+                          <span>{isCompared ? 'Compared' : 'Compare'}</span>
+                        </button>
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-6 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold font-headline uppercase text-[#0f5c66]">
+                            {prod.category?.name || 'Agri Commodity'}
+                          </span>
+                          {prod.exporterCompany?.verificationStatus === 'VERIFIED' && (
+                            <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded flex items-center gap-1">
+                              <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                              Verified Exporter
+                            </span>
+                          )}
+                        </div>
+
+                        <Link to={`/products/${prod.slug}`}>
+                          <h3 className="text-lg font-bold font-headline uppercase text-[#0b3a40] hover:text-[#0f5c66] transition-colors">
+                            {prod.name}
+                          </h3>
+                        </Link>
+
+                        <p className="text-xs text-[#1a1f23]/80 leading-relaxed line-clamp-2">
+                          {prod.description}
+                        </p>
+
+                        {/* Price & Incoterms */}
+                        <div className="pt-3 border-t border-[#0b3a40]/10 flex items-center justify-between">
+                          <div>
+                            <span className="text-lg font-extrabold text-[#0b3a40]">
+                              ${prod.pricePerMtUsd.toLocaleString()}
+                            </span>
+                            <span className="text-[10px] text-gray-500 block uppercase font-medium">
+                              Per Metric Ton (USD)
+                            </span>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-xs font-bold text-[#0f5c66] block">
+                              {prod.incoterms.join(' / ')}
+                            </span>
+                            <span className="text-[10px] text-gray-500 block">
+                              Incoterms
+                            </span>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="p-6 pt-0 space-y-2">
+                      <Link
+                        to={`/products/${prod.slug}`}
+                        className="w-full inline-flex items-center justify-center gap-1 bg-[#0b3a40] hover:bg-[#0f5c66] text-white text-xs font-bold font-headline uppercase py-2.5 rounded shadow transition-colors"
+                      >
+                        <span>View Specifications</span>
+                        <ArrowRight className="w-3.5 h-3.5 text-[#c9a46b]" />
+                      </Link>
+                    </div>
+
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
         </div>
       </section>
+
+      {/* Sticky Compare Bottom Drawer */}
+      {compareList.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#0b3a40] text-white px-6 py-3.5 rounded-full shadow-2xl border border-[#c9a46b]/40 flex items-center gap-4">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider font-headline">
+            <Scale className="w-4 h-4 text-[#c9a46b]" />
+            <span>Comparing {compareList.length} / 4 Products</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={openComparisonModal}
+            className="bg-[#c9a46b] hover:bg-[#b59057] text-[#0b3a40] text-xs font-bold font-headline uppercase px-4 py-1.5 rounded-full shadow transition-colors"
+          >
+            Open Comparison
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setCompareList([])}
+            className="text-white/60 hover:text-white p-1"
+            aria-label="Clear Compare"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Comparison Modal */}
+      {showCompareModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#0a0d14] border border-white/10 rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 space-y-6 text-white">
+            <div className="flex items-center justify-between pb-4 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <Scale className="w-5 h-5 text-[#c9a46b]" />
+                <h3 className="text-xl font-bold font-headline uppercase">
+                  Side-by-Side Commodity Comparison
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCompareModal(false)}
+                className="text-white/60 hover:text-white p-1 rounded-lg"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {comparedProducts.map((p) => (
+                <div key={p.id} className="bg-white/5 p-4 rounded-xl border border-white/10 space-y-4 text-xs">
+                  <div className="h-32 rounded-lg overflow-hidden bg-black">
+                    <img
+                      src={p.images?.[0]?.fileKey || '/images/pomegranate.webp'}
+                      alt={p.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-white uppercase font-headline">
+                      {p.name}
+                    </h4>
+                    <span className="text-[#c9a46b] font-extrabold text-base block mt-1">
+                      ${p.pricePerMtUsd.toLocaleString()} / MT
+                    </span>
+                  </div>
+
+                  <div className="space-y-2 pt-2 border-t border-white/10 text-[11px]">
+                    <p><span className="text-slate-400">MOQ:</span> <span className="font-bold text-white">{p.minOrderMt} MT</span></p>
+                    <p><span className="text-slate-400">Incoterms:</span> <span className="font-bold text-white">{p.incoterms.join(', ')}</span></p>
+                    <p><span className="text-slate-400">Packaging:</span> <span className="text-white">{p.packaging || 'Reefer'}</span></p>
+                    <p><span className="text-slate-400">Exporter:</span> <span className="text-emerald-400 font-semibold">{p.exporterCompany?.legalName || 'Anvi'}</span></p>
+                  </div>
+
+                  <Link
+                    to={`/quote?product=${encodeURIComponent(p.name)}`}
+                    className="w-full inline-block text-center bg-[#c9a46b] text-[#0b3a40] font-bold uppercase py-2 rounded font-headline"
+                  >
+                    Request Quote
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <FinalCtaSection />
     </>
