@@ -18,6 +18,7 @@ const InsightsPage = lazy(() => import('@/pages/InsightsPage'));
 const InsightDetailPage = lazy(() => import('@/pages/InsightDetailPage'));
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
 const TermsPage = lazy(() => import('@/pages/TermsPage'));
+const AdminDashboardPage = lazy(() => import('@/pages/AdminDashboardPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
 const PageLoader = () => (
