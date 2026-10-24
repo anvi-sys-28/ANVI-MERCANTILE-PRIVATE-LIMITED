@@ -8,12 +8,13 @@ import StrokeText from '@/components/ui/StrokeText';
 
 const overlayNavItems = [
   { number: '/01', label: 'Home', href: '/' },
-  { number: '/02', label: 'Services', href: '/services' },
-  { number: '/03', label: 'Trade Routes', href: '/trade' },
-  { number: '/04', label: 'Track Shipment', href: '/track' },
-  { number: '/05', label: 'About Us', href: '/about' },
-  { number: '/06', label: 'Latest Insights', href: '/insights' },
-  { number: '/07', label: 'Contact Us', href: '/contact' },
+  { number: '/02', label: 'Products', href: '/products' },
+  { number: '/03', label: 'Services', href: '/services' },
+  { number: '/04', label: 'Trade Routes', href: '/trade' },
+  { number: '/05', label: 'Track Shipment', href: '/track' },
+  { number: '/06', label: 'About Us', href: '/about' },
+  { number: '/07', label: 'Latest Insights', href: '/insights' },
+  { number: '/08', label: 'Contact Us', href: '/contact' },
 ];
 
 interface NavbarProps {
@@ -111,7 +112,7 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
             </div>
 
             {/* Center Navigation Links */}
-            <nav className="hidden md:flex items-center space-x-7 lg:space-x-10">
+            <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
               <NavLink
                 to="/"
                 className={({ isActive }) =>
@@ -121,6 +122,17 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
                 }
               >
                 Platform
+              </NavLink>
+
+              <NavLink
+                to="/products"
+                className={({ isActive }) =>
+                  `text-xs sm:text-sm font-normal tracking-wide transition-colors ${
+                    isActive ? 'text-white font-medium' : 'text-white/80 hover:text-white'
+                  }`
+                }
+              >
+                Products
               </NavLink>
 
               <NavLink

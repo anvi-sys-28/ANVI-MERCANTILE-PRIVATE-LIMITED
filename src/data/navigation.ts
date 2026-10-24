@@ -4,6 +4,7 @@ export interface NavItem {
 }
 
 export const navItems: NavItem[] = [
+  { label: "PRODUCTS", href: "/products" },
   { label: "SERVICES", href: "/services" },
   { label: "TRADE ROUTES", href: "/trade" },
   { label: "TRACKING", href: "/track" },
@@ -14,6 +15,7 @@ export const navItems: NavItem[] = [
 
 export const footerQuickLinks: NavItem[] = [
   { label: "Home", href: "/" },
+  { label: "Products", href: "/products" },
   { label: "About Us", href: "/about" },
   { label: "Trade Routes", href: "/trade" },
   { label: "Track Shipment", href: "/track" },
