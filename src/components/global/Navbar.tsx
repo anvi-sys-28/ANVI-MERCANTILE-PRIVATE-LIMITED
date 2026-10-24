@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
-import { X, ArrowUpRight, ChevronRight } from 'lucide-react';
+import { X, ChevronRight, ShoppingBag, ArrowUpRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { siteConfig } from '@/data/siteConfig';
 import { useScrolled } from '@/hooks/useScrolled';
+import { useCart } from '@/context/CartContext';
 import StrokeText from '@/components/ui/StrokeText';
 
 const overlayNavItems = [
@@ -25,6 +26,9 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
   const isScrolled = useScrolled(30);
   const [exploreMenuOpen, setExploreMenuOpen] = useState(false);
   const location = useLocation();
+  const { totalCount, openCart } = useCart();
+
+  const isProductsPage = location.pathname.startsWith('/products');
 
   // Close menu on route change
   useEffect(() => {
@@ -59,7 +63,9 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
       <header
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
           isScrolled
-            ? 'bg-[#030712]/90 backdrop-blur-md shadow-2xl border-b border-white/10 py-3.5'
+            ? isProductsPage
+              ? 'bg-[#F1E5C8]/95 backdrop-blur-md shadow-sm border-b border-[#D5CBC0] py-3.5'
+              : 'bg-[#030712]/90 backdrop-blur-md shadow-2xl border-b border-white/10 py-3.5'
             : 'bg-transparent py-6'
         }`}
       >
@@ -71,13 +77,23 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
               <button
                 type="button"
                 onClick={() => setExploreMenuOpen(true)}
-                className="p-1 text-white/80 hover:text-white transition-colors cursor-pointer group focus:outline-none"
+                className={`p-1 transition-colors cursor-pointer group focus:outline-none ${
+                  isProductsPage
+                    ? 'text-stone-900 hover:text-black'
+                    : 'text-white/80 hover:text-white'
+                }`}
                 aria-label="Open Navigation Menu"
               >
                 <div className="flex flex-col space-y-1.5 w-5">
-                  <span className="h-0.5 w-5 bg-current rounded-full transition-colors group-hover:bg-white" />
-                  <span className="h-0.5 w-5 bg-current rounded-full transition-colors group-hover:bg-white" />
-                  <span className="h-0.5 w-5 bg-current rounded-full transition-colors group-hover:bg-white" />
+                  <span className={`h-0.5 w-5 rounded-full transition-colors ${
+                    isProductsPage ? 'bg-stone-900 group-hover:bg-black' : 'bg-current group-hover:bg-white'
+                  }`} />
+                  <span className={`h-0.5 w-5 rounded-full transition-colors ${
+                    isProductsPage ? 'bg-stone-900 group-hover:bg-black' : 'bg-current group-hover:bg-white'
+                  }`} />
+                  <span className={`h-0.5 w-5 rounded-full transition-colors ${
+                    isProductsPage ? 'bg-stone-900 group-hover:bg-black' : 'bg-current group-hover:bg-white'
+                  }`} />
                 </div>
               </button>
 
@@ -90,11 +106,11 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
                 <div className="flex flex-col justify-center">
                   <div className="w-44 sm:w-52 h-6 sm:h-7 flex items-center">
                     <StrokeText
-                      key={isIntroActive ? 'intro-pending' : 'hero-entered'}
+                      key={isIntroActive ? 'intro-pending' : (isProductsPage ? 'products-theme' : 'hero-entered')}
                       text="ANVI MERCANTILE"
-                      strokeColor="#38BDF8"
-                      fillColor="#FFFFFF"
-                      strokeWidth={1.4}
+                      strokeColor={isProductsPage ? '#0284C7' : '#38BDF8'}
+                      fillColor={isProductsPage ? '#0F172A' : '#FFFFFF'}
+                      strokeWidth={isProductsPage ? 1.6 : 1.4}
                       fontSize={54}
                       fontWeight={800}
                       letterSpacing={-1}
@@ -104,7 +120,9 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
                       fillMode="wipe"
                     />
                   </div>
-                  <span className="text-[9px] sm:text-[10px] font-bold text-orange-400 tracking-[0.2em] uppercase leading-none mt-0.5">
+                  <span className={`text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase leading-none mt-0.5 ${
+                    isProductsPage ? 'text-orange-600' : 'text-orange-400'
+                  }`}>
                     By ANVI GROUPS
                   </span>
                 </div>
@@ -116,8 +134,14 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
               <NavLink
                 to="/"
                 className={({ isActive }) =>
-                  `text-xs sm:text-sm font-normal tracking-wide transition-colors ${
-                    isActive ? 'text-white font-medium' : 'text-white/80 hover:text-white'
+                  `text-xs sm:text-sm font-medium tracking-wide transition-colors ${
+                    isProductsPage
+                      ? isActive
+                        ? 'text-stone-950 font-bold border-b-2 border-stone-950 pb-0.5'
+                        : 'text-stone-800 hover:text-black font-semibold'
+                      : isActive
+                        ? 'text-white font-medium'
+                        : 'text-white/80 hover:text-white'
                   }`
                 }
               >
@@ -127,8 +151,14 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
               <NavLink
                 to="/products"
                 className={({ isActive }) =>
-                  `text-xs sm:text-sm font-normal tracking-wide transition-colors ${
-                    isActive ? 'text-white font-medium' : 'text-white/80 hover:text-white'
+                  `text-xs sm:text-sm font-medium tracking-wide transition-colors ${
+                    isProductsPage
+                      ? isActive
+                        ? 'text-stone-950 font-bold border-b-2 border-stone-950 pb-0.5'
+                        : 'text-stone-800 hover:text-black font-semibold'
+                      : isActive
+                        ? 'text-white font-medium'
+                        : 'text-white/80 hover:text-white'
                   }`
                 }
               >
@@ -138,8 +168,14 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
               <NavLink
                 to="/services"
                 className={({ isActive }) =>
-                  `text-xs sm:text-sm font-normal tracking-wide transition-colors ${
-                    isActive ? 'text-white font-medium' : 'text-white/80 hover:text-white'
+                  `text-xs sm:text-sm font-medium tracking-wide transition-colors ${
+                    isProductsPage
+                      ? isActive
+                        ? 'text-stone-950 font-bold border-b-2 border-stone-950 pb-0.5'
+                        : 'text-stone-800 hover:text-black font-semibold'
+                      : isActive
+                        ? 'text-white font-medium'
+                        : 'text-white/80 hover:text-white'
                   }`
                 }
               >
@@ -149,8 +185,14 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
               <NavLink
                 to="/trade"
                 className={({ isActive }) =>
-                  `text-xs sm:text-sm font-normal tracking-wide transition-colors ${
-                    isActive ? 'text-white font-medium' : 'text-white/80 hover:text-white'
+                  `text-xs sm:text-sm font-medium tracking-wide transition-colors ${
+                    isProductsPage
+                      ? isActive
+                        ? 'text-stone-950 font-bold border-b-2 border-stone-950 pb-0.5'
+                        : 'text-stone-800 hover:text-black font-semibold'
+                      : isActive
+                        ? 'text-white font-medium'
+                        : 'text-white/80 hover:text-white'
                   }`
                 }
               >
@@ -160,8 +202,14 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
               <NavLink
                 to="/about"
                 className={({ isActive }) =>
-                  `text-xs sm:text-sm font-normal tracking-wide transition-colors ${
-                    isActive ? 'text-white font-medium' : 'text-white/80 hover:text-white'
+                  `text-xs sm:text-sm font-medium tracking-wide transition-colors ${
+                    isProductsPage
+                      ? isActive
+                        ? 'text-stone-950 font-bold border-b-2 border-stone-950 pb-0.5'
+                        : 'text-stone-800 hover:text-black font-semibold'
+                      : isActive
+                        ? 'text-white font-medium'
+                        : 'text-white/80 hover:text-white'
                   }`
                 }
               >
@@ -169,16 +217,45 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
               </NavLink>
             </nav>
 
-            {/* Header Right Action */}
-            <Link
-              to="/quote"
-              className="inline-flex items-center gap-2.5 bg-white hover:bg-slate-100 text-slate-950 font-medium text-xs sm:text-sm px-4 py-2 rounded-full shadow-lg transition-all transform hover:scale-105 group"
-            >
-              <span>Get a Quote</span>
-              <div className="w-5 h-5 rounded-full bg-slate-950 text-white flex items-center justify-center shrink-0">
-                <ChevronRight className="w-3 h-3 stroke-[2.5]" />
-              </div>
-            </Link>
+            {/* Header Right Action Group: Cart Button + Get a Quote */}
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              {/* Order Cart Button */}
+              <button
+                type="button"
+                onClick={openCart}
+                className={`inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                  isProductsPage
+                    ? 'bg-[#807562] hover:bg-[#6D6352] text-white shadow-xs'
+                    : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
+                }`}
+                aria-label="View Order Cart"
+              >
+                <ShoppingBag size={15} />
+                <span className="hidden sm:inline">Cart</span>
+                {totalCount > 0 && (
+                  <span className="w-5 h-5 rounded-full bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+                    {totalCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Get a Quote Action Button */}
+              <Link
+                to="/quote"
+                className={`inline-flex items-center gap-2 font-medium text-xs sm:text-sm px-3.5 sm:px-4 py-2 rounded-full shadow-lg transition-all transform hover:scale-105 group ${
+                  isProductsPage
+                    ? 'bg-[#242623] hover:bg-black text-white'
+                    : 'bg-white hover:bg-slate-100 text-slate-950'
+                }`}
+              >
+                <span>Get a Quote</span>
+                <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+                  isProductsPage ? 'bg-white/20 text-white' : 'bg-slate-950 text-white'
+                }`}>
+                  <ChevronRight className="w-3 h-3 stroke-[2.5]" />
+                </div>
+              </Link>
+            </div>
 
           </div>
         </div>

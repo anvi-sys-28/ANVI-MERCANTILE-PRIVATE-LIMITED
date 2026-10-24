@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, 
@@ -7,12 +7,11 @@ import {
   X, 
   Star, 
   ShoppingBag, 
-  ArrowRight, 
-  Phone, 
-  ShieldCheck,
-  ChevronUp
+  ChevronUp,
+  ArrowRight
 } from 'lucide-react';
 import { SEO } from '@/components/global/SEO';
+import { useCart } from '@/context/CartContext';
 import { 
   organicProductsList, 
   trustBarItems,
@@ -20,26 +19,35 @@ import {
   type ProductVariant 
 } from '@/data/organicProductsData';
 
+type CategoryFilter = 'All' | 'Fresh Fruits' | 'Vegetables & Roots' | 'Grains & Superfoods';
+
 export default function ProductsPage() {
+  const { addItem, totalCount, openCart } = useCart();
+
   const [selectedProduct, setSelectedProduct] = useState<OrganicProduct>(organicProductsList[0]);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant>(organicProductsList[0].variants[0]);
   const [quantity, setQuantity] = useState<number>(1);
   const [openAccordion, setOpenAccordion] = useState<string>('description');
   const [showReview, setShowReview] = useState<boolean>(true);
   const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
-  const [cartToast, setCartToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
-  const [isOrderModalOpen, setIsOrderModalOpen] = useState<boolean>(false);
+  const [activeCategory, setActiveCategory] = useState<CategoryFilter>('All');
 
   const topSectionRef = useRef<HTMLDivElement>(null);
 
-  // Switch product when clicked from bottom "Do you also have" grid
+  // Filtered commodities for Section 2
+  const filteredProducts = useMemo(() => {
+    if (activeCategory === 'All') return organicProductsList;
+    return organicProductsList.filter(p => p.category === activeCategory);
+  }, [activeCategory]);
+
+  // Switch spotlight product when clicked from bottom grid
   const handleSelectProduct = (product: OrganicProduct) => {
     setSelectedProduct(product);
     setSelectedVariant(product.variants[0]);
     setQuantity(1);
     setOpenAccordion('description');
     
-    // Smooth scroll to spotlight section
+    // Smooth scroll to top spotlight section
     if (topSectionRef.current) {
       topSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -47,35 +55,29 @@ export default function ProductsPage() {
 
   // Add to cart handler
   const handleAddToCart = () => {
-    const variantName = selectedVariant.label !== 'Choose an option' ? selectedVariant.label : 'Standard Order';
-    const message = `Added ${quantity}x ${selectedProduct.name} (${variantName}) to cart!`;
-    setCartToast({ message, visible: true });
-    setIsOrderModalOpen(true);
+    const variantName = selectedVariant.label !== 'Choose an option' 
+      ? selectedVariant.label 
+      : (selectedProduct.variants[1]?.label || 'Standard Order');
 
-    setTimeout(() => {
-      setCartToast(prev => ({ ...prev, visible: false }));
-    }, 4000);
-  };
+    const variantPrice = selectedVariant.price || selectedProduct.variants[1]?.price || selectedProduct.priceRange;
 
-  // Generate WhatsApp order link
-  const getWhatsAppOrderUrl = () => {
-    const variantText = selectedVariant.label !== 'Choose an option' ? `Variant: ${selectedVariant.label}` : '';
-    const text = `Hello Anvi Mercantile Trade Desk,
-I would like to place an order from the Products catalog:
-Product: ${selectedProduct.name}
-${variantText}
-Quantity: ${quantity}
-Estimated Price: ${selectedVariant.price || selectedProduct.priceRange}
-
-Please share proforma invoice and export shipment details.`;
-    return `https://wa.me/918328246413?text=${encodeURIComponent(text)}`;
+    addItem({
+      productId: selectedProduct.id,
+      name: selectedProduct.name,
+      image: selectedProduct.image,
+      variantLabel: variantName,
+      priceDisplay: variantPrice,
+      unitPriceUsd: 0,
+      quantity,
+      category: selectedProduct.category,
+    });
   };
 
   return (
     <>
       <SEO
-        title="Explore Organic Export Products | Anvi Mercantile"
-        description="Explore fresh organic fruits, vegetables, and agro commodities. Order retail packs, export quality air sample boxes, or full refrigerated container loads (FCL) directly from verified Indian packhouses."
+        title="Explore Agro Export Commodities & Fresh Produce | Anvi Mercantile"
+        description="Explore fresh fruits, vegetables, Basmati rice, and agro commodities. Order retail packs, export air sample boxes, or full refrigerated container loads (FCL) directly from verified Indian packhouses."
       />
 
       <div className="w-full font-sans antialiased selection:bg-[#807562]/20 selection:text-[#1F1E1B]">
@@ -86,7 +88,7 @@ Please share proforma invoice and export shipment details.`;
         <section 
           ref={topSectionRef}
           style={{ backgroundColor: '#F1E5C8' }} 
-          className="pt-24 sm:pt-28 lg:pt-32 pb-14 sm:pb-16 px-4 sm:px-6 lg:px-12 text-[#1F1E1B] transition-colors duration-300"
+          className="pt-28 sm:pt-32 lg:pt-36 pb-14 sm:pb-16 px-4 sm:px-6 lg:px-12 text-[#1F1E1B] transition-colors duration-300"
         >
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-start">
@@ -94,6 +96,11 @@ Please share proforma invoice and export shipment details.`;
               {/* LEFT COLUMN: TITLE, PRICE, VARIANT, QUANTITY, BREADCRUMB, STAT */}
               <div className="lg:col-span-4 flex flex-col justify-between pt-2">
                 <div>
+                  {/* Category Pill Tag */}
+                  <div className="inline-block bg-[#807562]/15 text-[#6D6352] text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-3">
+                    {selectedProduct.category}
+                  </div>
+
                   {/* Big Headline */}
                   <h1 className="text-3xl sm:text-4xl lg:text-[40px] font-bold text-[#1F1E1B] leading-[1.12] tracking-tight">
                     {selectedProduct.name}
@@ -110,9 +117,9 @@ Please share proforma invoice and export shipment details.`;
                       htmlFor="amount-select" 
                       className="block text-xs font-normal text-[#5A554D] mb-1.5"
                     >
-                      Amount
+                      Amount / Pack Size
                     </label>
-                    <div className="relative inline-block w-full max-w-[280px]">
+                    <div className="relative inline-block w-full max-w-[320px]">
                       <select
                         id="amount-select"
                         value={selectedVariant.label}
@@ -169,6 +176,7 @@ Please share proforma invoice and export shipment details.`;
                       style={{ backgroundColor: '#807562' }}
                       className="hover:opacity-90 active:scale-98 text-white text-xs sm:text-sm font-medium px-7 py-2.5 rounded-full shadow-xs transition-all cursor-pointer inline-flex items-center gap-2"
                     >
+                      <ShoppingBag size={14} />
                       <span>Add To Cart</span>
                     </button>
                   </div>
@@ -244,14 +252,14 @@ Please share proforma invoice and export shipment details.`;
                     )}
                   </div>
 
-                  {/* 2. Ingredients */}
+                  {/* 2. Ingredients / Variety */}
                   <div>
                     <button
                       type="button"
                       onClick={() => setOpenAccordion(openAccordion === 'ingredients' ? '' : 'ingredients')}
                       className="w-full py-3 flex items-center justify-between text-left text-xs sm:text-sm font-semibold text-[#1F1E1B] hover:text-[#000] cursor-pointer"
                     >
-                      <span>Ingredients</span>
+                      <span>Grade & Origin</span>
                       <span className="text-base font-light text-[#555] ml-2">
                         {openAccordion === 'ingredients' ? '−' : '+'}
                       </span>
@@ -263,14 +271,14 @@ Please share proforma invoice and export shipment details.`;
                     )}
                   </div>
 
-                  {/* 3. Free In-Store Pickup */}
+                  {/* 3. Port Loading & Logistics */}
                   <div>
                     <button
                       type="button"
                       onClick={() => setOpenAccordion(openAccordion === 'freePickup' ? '' : 'freePickup')}
                       className="w-full py-3 flex items-center justify-between text-left text-xs sm:text-sm font-semibold text-[#1F1E1B] hover:text-[#000] cursor-pointer"
                     >
-                      <span>Free In-Store Pickup</span>
+                      <span>Port Loading & Shipping</span>
                       <span className="text-base font-light text-[#555] ml-2">
                         {openAccordion === 'freePickup' ? '−' : '+'}
                       </span>
@@ -282,14 +290,14 @@ Please share proforma invoice and export shipment details.`;
                     )}
                   </div>
 
-                  {/* 4. Premium Quality */}
+                  {/* 4. Quality & APEDA Standards */}
                   <div>
                     <button
                       type="button"
                       onClick={() => setOpenAccordion(openAccordion === 'premiumQuality' ? '' : 'premiumQuality')}
                       className="w-full py-3 flex items-center justify-between text-left text-xs sm:text-sm font-semibold text-[#1F1E1B] hover:text-[#000] cursor-pointer"
                     >
-                      <span>Premium Quality</span>
+                      <span>Quality & Inspection</span>
                       <span className="text-base font-light text-[#555] ml-2">
                         {openAccordion === 'premiumQuality' ? '−' : '+'}
                       </span>
@@ -301,14 +309,14 @@ Please share proforma invoice and export shipment details.`;
                     )}
                   </div>
 
-                  {/* 5. Organic & Fair Trade */}
+                  {/* 5. Packaging & Cold Chain */}
                   <div>
                     <button
                       type="button"
                       onClick={() => setOpenAccordion(openAccordion === 'organicFairTrade' ? '' : 'organicFairTrade')}
                       className="w-full py-3 flex items-center justify-between text-left text-xs sm:text-sm font-semibold text-[#1F1E1B] hover:text-[#000] cursor-pointer"
                     >
-                      <span>Organic & Fair Trade</span>
+                      <span>Packaging & Cold Chain</span>
                       <span className="text-base font-light text-[#555] ml-2">
                         {openAccordion === 'organicFairTrade' ? '−' : '+'}
                       </span>
@@ -394,13 +402,31 @@ Please share proforma invoice and export shipment details.`;
           <div className="max-w-7xl mx-auto">
             
             {/* Centered Heading */}
-            <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-semibold text-[#1F1E1B] text-center mb-10 sm:mb-14 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-semibold text-[#1F1E1B] text-center mb-6 tracking-tight">
               Do you also have
             </h2>
 
-            {/* 5 Product Cards in a Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
-              {organicProductsList.slice(1, 6).map((product) => {
+            {/* Category Filter Tabs */}
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-10 sm:mb-12">
+              {(['All', 'Fresh Fruits', 'Vegetables & Roots', 'Grains & Superfoods'] as const).map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setActiveCategory(cat)}
+                  className={`text-xs sm:text-sm font-semibold px-4 py-2 rounded-full transition-all cursor-pointer ${
+                    activeCategory === cat
+                      ? 'bg-[#242623] text-white shadow-xs'
+                      : 'bg-stone-200/60 hover:bg-stone-300/80 text-stone-700'
+                  }`}
+                >
+                  {cat === 'All' ? `All Products (${organicProductsList.length})` : cat}
+                </button>
+              ))}
+            </div>
+
+            {/* Product Cards Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4 lg:gap-5">
+              {filteredProducts.map((product) => {
                 const isCurrentActive = selectedProduct.id === product.id;
                 return (
                   <div
@@ -448,16 +474,16 @@ Please share proforma invoice and export shipment details.`;
               })}
             </div>
 
-            {/* Quick Link to Anvi Bulk Commodities */}
+            {/* Quick Link to Anvi Trade Routes */}
             <div className="mt-14 text-center">
               <p className="text-xs sm:text-sm text-[#7A746B] mb-3">
-                Looking for 10 MT to 500 MT container shipments (Pomegranates, Basmati Rice, Grapes, Onions, Green Chillies, Makhana)?
+                Need customized chartering, multi-container contracts, or special port discharge arrangements?
               </p>
               <a
                 href="/trade"
                 className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#1F1E1B] hover:text-[#807562] underline underline-offset-4 transition-colors"
               >
-                <span>View Full B2B Agro Commodity Catalog</span>
+                <span>Explore International Maritime Shipping Routes</span>
                 <ArrowRight size={14} />
               </a>
             </div>
@@ -468,109 +494,23 @@ Please share proforma invoice and export shipment details.`;
       </div>
 
       {/* ========================================================= */}
-      {/* FLOATING CART TOAST NOTIFICATION                          */}
+      {/* FLOATING QUICK CART PILL BUTTON                           */}
       {/* ========================================================= */}
-      <AnimatePresence>
-        {cartToast.visible && (
-          <motion.div
-            initial={{ opacity: 0, y: 30, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-50 bg-[#1F2420] text-white px-5 py-3 rounded-2xl shadow-2xl border border-stone-700 flex items-center gap-3"
-          >
-            <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-              <ShoppingBag size={16} />
-            </div>
-            <div>
-              <div className="text-xs font-semibold">{cartToast.message}</div>
-              <div className="text-[11px] text-stone-400">Order ready to checkout</div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setCartToast(prev => ({ ...prev, visible: false }))}
-              className="text-stone-400 hover:text-white ml-2 p-1 cursor-pointer"
-            >
-              <X size={14} />
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ========================================================= */}
-      {/* QUICK ORDER MODAL / DRAWER                                */}
-      {/* ========================================================= */}
-      <AnimatePresence>
-        {isOrderModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.94 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.94 }}
-              className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-stone-200 text-[#1F1E1B] relative"
-            >
-              <button
-                type="button"
-                onClick={() => setIsOrderModalOpen(false)}
-                className="absolute top-5 right-5 text-stone-400 hover:text-stone-700 p-1 cursor-pointer"
-                aria-label="Close modal"
-              >
-                <X size={18} />
-              </button>
-
-              <div className="flex items-center gap-3.5 mb-5 pb-4 border-b border-stone-100">
-                <img
-                  src={selectedProduct.image}
-                  alt={selectedProduct.altText}
-                  className="w-16 h-16 object-contain rounded-xl bg-stone-50 p-2 border border-stone-100"
-                />
-                <div>
-                  <h3 className="text-base font-bold text-stone-900 leading-tight">
-                    {selectedProduct.name}
-                  </h3>
-                  <div className="text-xs text-[#807562] font-semibold mt-0.5">
-                    {selectedVariant.price || selectedProduct.priceRange}
-                  </div>
-                  <div className="text-[11px] text-stone-500 mt-0.5">
-                    Quantity: {quantity} unit(s)
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3 mb-6 text-xs text-stone-600 bg-stone-50 p-3.5 rounded-2xl border border-stone-200/60">
-                <div className="flex items-center gap-2 text-emerald-800 font-medium">
-                  <ShieldCheck size={16} className="text-emerald-600 shrink-0" />
-                  <span>100% Export Grade Quality & Phytosanitary Inspected</span>
-                </div>
-                <div className="text-[11px] text-stone-500 pl-6">
-                  Dispatched from APMC Navi Mumbai or JNPT Nhava Sheva (INNSA). Air sample orders dispatched within 48 hours.
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2.5">
-                {/* 1-Tap WhatsApp Checkout */}
-                <a
-                  href={getWhatsAppOrderUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 rounded-full text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all"
-                >
-                  <Phone size={16} />
-                  <span>Confirm Order via WhatsApp Trade Desk</span>
-                </a>
-
-                {/* Continue Shopping */}
-                <button
-                  type="button"
-                  onClick={() => setIsOrderModalOpen(false)}
-                  className="w-full bg-stone-100 hover:bg-stone-200 text-stone-800 font-medium py-2.5 px-4 rounded-full text-xs transition-colors cursor-pointer"
-                >
-                  Continue Exploring Products
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      <div className="fixed bottom-6 right-6 z-40">
+        <button
+          type="button"
+          onClick={openCart}
+          className="bg-[#242623] hover:bg-black text-white text-xs sm:text-sm font-semibold py-3 px-5 rounded-full shadow-2xl border border-stone-700 flex items-center gap-2.5 transition-all hover:scale-105 cursor-pointer"
+        >
+          <ShoppingBag size={16} />
+          <span>View Export Cart</span>
+          {totalCount > 0 && (
+            <span className="bg-emerald-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+              {totalCount}
+            </span>
+          )}
+        </button>
+      </div>
 
       {/* ========================================================= */}
       {/* HIGH RESOLUTION LIGHTBOX                                  */}
@@ -579,7 +519,7 @@ Please share proforma invoice and export shipment details.`;
         {isLightboxOpen && (
           <div 
             onClick={() => setIsLightboxOpen(false)}
-            className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-6 cursor-zoom-out"
+            className="fixed inset-0 z-60 bg-black/85 backdrop-blur-md flex items-center justify-center p-6 cursor-zoom-out"
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
