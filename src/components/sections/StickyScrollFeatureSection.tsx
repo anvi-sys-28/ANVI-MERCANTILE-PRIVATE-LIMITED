@@ -134,14 +134,6 @@ export function StickyScrollFeatureSection({
               {/* Dark subtle gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/20 pointer-events-none" />
 
-              {/* Floating SHOWREEL 25/26 Pill Badge matching Phenomenon Studio reference image */}
-              <div className="absolute top-[52%] right-6 -translate-y-1/2 z-10">
-                <div className="inline-flex items-center gap-2 bg-black/75 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full shadow-2xl text-xs font-mono tracking-wider text-white uppercase group-hover:bg-white group-hover:text-black transition-all">
-                  <span className="underline underline-offset-4 font-semibold">SHOWREEL 25/26</span>
-                  <span className="text-[10px]">▶</span>
-                </div>
-              </div>
-
               {/* Bottom Video Controls */}
               <div className="absolute bottom-5 left-5 right-5 z-10 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs text-white/90 font-mono">
