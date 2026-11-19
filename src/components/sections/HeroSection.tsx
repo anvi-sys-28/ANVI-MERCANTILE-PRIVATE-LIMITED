@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import InkBlotCarousel from '@/components/ui/ink-blot-carousel';
-import CountUp from '@/components/ui/CountUp';
 import { QuickOrderBox } from '@/components/home/QuickOrderBox';
 
 const CAROUSEL_SLIDES = [
@@ -139,7 +138,7 @@ export function HeroSection() {
                   Trusted by fleets.
                 </motion.h1>
 
-                {/* CTA Button + Social Proof Row */}
+                {/* CTA Button Row */}
                 <motion.div
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -155,46 +154,6 @@ export function HeroSection() {
                       <ArrowRight className="w-3 h-3" />
                     </div>
                   </Link>
-
-                  {/* Social Proof */}
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex -space-x-2 overflow-hidden">
-                      <img
-                        className="inline-block h-7 w-7 rounded-full ring-2 ring-slate-900 object-cover"
-                        src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80"
-                        alt="Leader"
-                        width="28"
-                        height="28"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                      <img
-                        className="inline-block h-7 w-7 rounded-full ring-2 ring-slate-900 object-cover"
-                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80"
-                        alt="Leader"
-                        width="28"
-                        height="28"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                      <img
-                        className="inline-block h-7 w-7 rounded-full ring-2 ring-slate-900 object-cover"
-                        src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=100&q=80"
-                        alt="Leader"
-                        width="28"
-                        height="28"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </div>
-                    <span className="text-xs text-white/80 font-normal">
-                      Trusted by{' '}
-                      <span className="font-semibold text-white">
-                        <CountUp from={0} to={500} duration={2.5} separator="," />+
-                      </span>{' '}
-                      industry leaders
-                    </span>
-                  </div>
                 </motion.div>
 
                 {/* Paragraph Description */}
