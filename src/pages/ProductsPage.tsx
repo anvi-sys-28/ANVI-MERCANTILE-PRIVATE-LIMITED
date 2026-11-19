@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import { SEO } from '@/components/global/SEO';
 import { useCart } from '@/context/CartContext';
+import { RiceHeroBanner } from '@/components/products/RiceHeroBanner';
+import { RiceShowcaseSection } from '@/components/products/RiceShowcaseSection';
 
 // --- TYPES ---
 export interface StoreProduct {
@@ -170,60 +172,23 @@ export default function ProductsPage() {
         description="Explore fresh export commodities directly sourced from certified Indian farms: Green Chilly, Pomegranate, Coconut, Makhana, Basmati Rice, Guava, and Grapes."
       />
 
-      <div className="min-h-screen bg-white text-gray-900 font-sans antialiased pt-24 sm:pt-28 pb-20 selection:bg-emerald-100 selection:text-emerald-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 sm:space-y-16">
+      <div className="min-h-screen bg-[#F6F7F6] text-gray-900 font-sans antialiased pt-16 sm:pt-20 pb-16 selection:bg-emerald-100 selection:text-emerald-900">
+        {/* ========================================================================= */}
+        {/* TOP DIV: FULL-WIDTH HORIZONTAL HERO SLIDER (EDGE-TO-EDGE, NO BOX)        */}
+        {/* ========================================================================= */}
+        <RiceHeroBanner />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-10 mt-6 sm:mt-8">
 
           {/* ========================================================================= */}
-          {/* SECTION 1: SHOP BY CATEGORY (COMMENTED OUT AS REQUESTED)                   */}
+          {/* SECTION 1: RICE SHOWCASE (GRADES 1-6, SLIDERS, METRICS, & PLACE ORDER)   */}
           {/* ========================================================================= */}
+          <RiceShowcaseSection />
+
+          {/* Shop by Category - commented out as requested */}
           {/*
           <section className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-gray-900 tracking-tight">
-                Shop by Category
-              </h2>
-              <button
-                type="button"
-                onClick={() => handleCategoryClick('All Products')}
-                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer group"
-              >
-                <span>All Categories</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
-              {CATEGORIES.map((cat) => (
-                <div
-                  key={cat.id}
-                  onClick={() => handleCategoryClick(cat.filterKey)}
-                  className="bg-white border border-gray-100/90 rounded-2xl p-2.5 sm:p-3 flex flex-col items-center justify-between shadow-xs hover:shadow-md hover:border-gray-200 transition-all cursor-pointer group hover:-translate-y-1"
-                >
-                  <div className="h-16 sm:h-20 w-full flex items-center justify-center p-1 overflow-hidden">
-                    <img
-                      src={cat.image}
-                      alt={cat.name}
-                      onError={(e) => {
-                        e.currentTarget.src = cat.fallbackImage;
-                      }}
-                      className="max-h-full max-w-full object-contain group-hover:scale-108 transition-transform duration-300 drop-shadow-xs"
-                      loading="lazy"
-                    />
-                  </div>
-
-                  <div
-                    className={`w-full text-center py-1.5 px-1 rounded-xl mt-2 transition-colors ${cat.pillBg} ${cat.pillText}`}
-                  >
-                    <span className="font-bold text-xs block leading-tight">
-                      {cat.name}
-                    </span>
-                    <span className="text-[10px] text-gray-500 font-normal block mt-0.5 leading-none">
-                      {cat.count}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+            ... Shop by Category ...
           </section>
           */}
 
