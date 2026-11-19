@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { AppLaunchSection } from '@/components/sections/AppLaunchSection';
 import { 
   Ship, 
   Play, 
@@ -329,6 +330,11 @@ export function StickyScrollFeatureSection({
 
           </div>
 
+        </div>
+
+        {/* MOBILE APP · LAUNCHING SOON SECTION (Directly following Container Freight Booking CTA) */}
+        <div className="mt-16 sm:mt-24 pt-8 border-t border-white/10">
+          <AppLaunchSection />
         </div>
 
       </div>

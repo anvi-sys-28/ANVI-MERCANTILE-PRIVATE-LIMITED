@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
-import { X, ChevronRight, ShoppingBag, ArrowUpRight, Sparkles, Clock, ShieldCheck, Phone } from 'lucide-react';
+import { X, ChevronRight, ShoppingBag, ArrowUpRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { siteConfig } from '@/data/siteConfig';
 import { useScrolled } from '@/hooks/useScrolled';
@@ -25,7 +25,6 @@ interface NavbarProps {
 export function Navbar({ isIntroActive = false }: NavbarProps) {
   const isScrolled = useScrolled(30);
   const [exploreMenuOpen, setExploreMenuOpen] = useState(false);
-  const [isLaunchModalOpen, setIsLaunchModalOpen] = useState(false);
   const location = useLocation();
   const { totalCount, openCart } = useCart();
 
@@ -63,11 +62,13 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-          isScrolled
-            ? isProductsPage
-              ? 'bg-[#F1E5C8]/95 backdrop-blur-md shadow-sm border-b border-[#D5CBC0] py-3.5'
-              : 'bg-[#030712]/90 backdrop-blur-md shadow-2xl border-b border-white/10 py-3.5'
-            : 'bg-transparent py-6'
+          isProductsPage
+            ? isScrolled
+              ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-200 py-3.5'
+              : 'bg-white/90 backdrop-blur-md border-b border-slate-100 py-4'
+            : isScrolled
+              ? 'bg-[#030712]/90 backdrop-blur-md shadow-2xl border-b border-white/10 py-3.5'
+              : 'bg-transparent py-6'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -149,22 +150,22 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
                 Platform
               </NavLink>
 
-              {/* Products (Disabled navigation -> Opens Upcoming Platform Announcement Modal) */}
-              <button
-                type="button"
-                onClick={() => setIsLaunchModalOpen(true)}
-                className={`text-xs sm:text-sm font-medium tracking-wide transition-colors inline-flex items-center gap-1.5 cursor-pointer focus:outline-none ${
-                  isProductsPage
-                    ? 'text-stone-800 hover:text-black font-semibold'
-                    : 'text-white/80 hover:text-white'
-                }`}
-                title="New B2B Agro-Export Platform Launching Soon"
+              <NavLink
+                to="/products"
+                className={({ isActive }) =>
+                  `text-xs sm:text-sm font-medium tracking-wide transition-colors ${
+                    isProductsPage
+                      ? isActive
+                        ? 'text-stone-950 font-bold border-b-2 border-stone-950 pb-0.5'
+                        : 'text-stone-800 hover:text-black font-semibold'
+                      : isActive
+                        ? 'text-white font-medium'
+                        : 'text-white/80 hover:text-white'
+                  }`
+                }
               >
-                <span>Products</span>
-                <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wider leading-none">
-                  Soon
-                </span>
-              </button>
+                Products
+              </NavLink>
 
               <NavLink
                 to="/services"
@@ -323,52 +324,27 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
-                    {overlayNavItems.map((item) => {
-                      if (item.label === 'Products') {
-                        return (
-                          <button
-                            key={item.href}
-                            type="button"
-                            onClick={() => {
-                              setExploreMenuOpen(false);
-                              setIsLaunchModalOpen(true);
-                            }}
-                            className="group flex items-center justify-between py-4 border-b border-white/10 transition-all text-white hover:text-sky-400 hover:pl-2 text-left cursor-pointer w-full"
-                          >
-                            <span className="text-xl sm:text-2xl font-extrabold font-headline uppercase tracking-wide transition-colors flex items-center gap-2.5">
-                              <span>{item.label}</span>
-                              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wider">
-                                Launching Soon
-                              </span>
-                            </span>
-                            <span className="text-xs font-mono text-white/40 group-hover:text-sky-400 transition-colors">
-                              {item.number}
-                            </span>
-                          </button>
-                        );
-                      }
-                      return (
-                        <NavLink
-                          key={item.href}
-                          to={item.href}
-                          onClick={() => setExploreMenuOpen(false)}
-                          className={({ isActive }) =>
-                            `group flex items-center justify-between py-4 border-b border-white/10 transition-all ${
-                              isActive
-                                ? 'text-sky-400 border-sky-400/50 pl-2'
-                                : 'text-white hover:text-sky-400 hover:pl-2'
-                            }`
-                          }
-                        >
-                          <span className="text-xl sm:text-2xl font-extrabold font-headline uppercase tracking-wide transition-colors">
-                            {item.label}
-                          </span>
-                          <span className="text-xs font-mono text-white/40 group-hover:text-sky-400 transition-colors">
-                            {item.number}
-                          </span>
-                        </NavLink>
-                      );
-                    })}
+                    {overlayNavItems.map((item) => (
+                      <NavLink
+                        key={item.href}
+                        to={item.href}
+                        onClick={() => setExploreMenuOpen(false)}
+                        className={({ isActive }) =>
+                          `group flex items-center justify-between py-4 border-b border-white/10 transition-all ${
+                            isActive
+                              ? 'text-sky-400 border-sky-400/50 pl-2'
+                              : 'text-white hover:text-sky-400 hover:pl-2'
+                          }`
+                        }
+                      >
+                        <span className="text-xl sm:text-2xl font-extrabold font-headline uppercase tracking-wide transition-colors">
+                          {item.label}
+                        </span>
+                        <span className="text-xs font-mono text-white/40 group-hover:text-sky-400 transition-colors">
+                          {item.number}
+                        </span>
+                      </NavLink>
+                    ))}
                   </div>
 
                 </div>
@@ -429,111 +405,6 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
             </div>
 
           </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* UPCOMING B2B PLATFORM LAUNCH ANNOUNCEMENT MODAL */}
-      <AnimatePresence>
-        {isLaunchModalOpen && (
-          <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.94, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.94, y: 15 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-              className="relative w-full max-w-lg bg-[#080d1a] border border-sky-500/30 text-white rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_rgba(56,189,248,0.2)] overflow-hidden"
-            >
-              {/* Radial ambient glow */}
-              <div className="absolute -top-24 -right-24 w-60 h-60 bg-sky-500/20 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute -bottom-24 -left-24 w-60 h-60 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-
-              {/* Close Button */}
-              <button
-                type="button"
-                onClick={() => setIsLaunchModalOpen(false)}
-                className="absolute top-5 right-5 p-2 rounded-full bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors cursor-pointer z-10"
-                aria-label="Close announcement"
-              >
-                <X size={18} />
-              </button>
-
-              {/* Glowing Badge */}
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/15 border border-sky-400/30 text-sky-300 text-xs font-bold tracking-wide uppercase mb-4">
-                <Sparkles size={14} className="text-sky-400" />
-                <span>Next-Gen Platform Launching Soon</span>
-              </div>
-
-              {/* Header */}
-              <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight mb-3">
-                Seamless B2B Agro-Export in Just 5 Minutes
-              </h3>
-
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-6">
-                We are launching an industry-first online export marketplace for international importers and buyers. Browse farm-direct produce, choose container volumes, get instant FOB/CIF pricing, and place orders with zero friction.
-              </p>
-
-              {/* Key Platform Highlights */}
-              <div className="space-y-3 mb-6 text-xs sm:text-[13px]">
-                <div className="flex items-start gap-3 bg-white/5 border border-white/10 p-3.5 rounded-2xl">
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
-                    <Clock size={16} />
-                  </div>
-                  <div>
-                    <div className="font-bold text-white">5-Minute Order Placement</div>
-                    <div className="text-slate-400 text-[11px] sm:text-xs mt-0.5">
-                      No more waiting days for email quotes. Select commodities (MOQ 10 MT to 500 MT) and request samples in minutes.
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 bg-white/5 border border-white/10 p-3.5 rounded-2xl">
-                  <div className="w-8 h-8 rounded-xl bg-sky-500/15 text-sky-400 flex items-center justify-center shrink-0 mt-0.5">
-                    <ShieldCheck size={16} />
-                  </div>
-                  <div>
-                    <div className="font-bold text-white">Verified Exporters & Direct Farm Sourcing</div>
-                    <div className="text-slate-400 text-[11px] sm:text-xs mt-0.5">
-                      Pomegranates, Basmati rice, Grapes, Onions, Green chillies, and Makhana backed by APEDA & Phytosanitary certifications.
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 pt-1">
-                <a
-                  href={`https://wa.me/918328246413?text=${encodeURIComponent(
-                    'Hello Anvi Mercantile Trade Desk, I would like to register for early priority access to your upcoming 5-minute B2B Agro-Export platform.'
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-5 rounded-full text-xs sm:text-sm shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  <Phone size={15} />
-                  <span>Join Priority Waitlist</span>
-                </a>
-
-                <button
-                  type="button"
-                  onClick={() => setIsLaunchModalOpen(false)}
-                  className="inline-flex items-center justify-center py-3 px-5 rounded-full bg-white/10 hover:bg-white/15 text-white/90 text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
-                >
-                  <span>Close</span>
-                </button>
-              </div>
-
-              {/* Direct Trade Desk Line */}
-              <div className="mt-5 pt-4 border-t border-white/10 text-center">
-                <p className="text-[11px] text-slate-400">
-                  Need an immediate container booking or air sample right now? Call our 24/7 trade desk:{' '}
-                  <a href="tel:+918328246413" className="text-sky-400 font-semibold hover:underline">
-                    +91 8328246413
-                  </a>
-                </p>
-              </div>
-
-            </motion.div>
-          </div>
         )}
       </AnimatePresence>
     </>

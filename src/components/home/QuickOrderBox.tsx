@@ -9,13 +9,13 @@ export interface QuickOrderBoxProps {
 }
 
 const COMMODITIES = [
-  { name: 'Fresh Green Chilly', slug: 'fresh-g4-green-chillies-pungent', defaultMt: 10, price: '$1,650/MT' },
-  { name: 'Ruby Pomegranates (Bhagwa)', slug: 'fresh-ruby-red-pomegranates-bhagwa', defaultMt: 18, price: '$1,450/MT' },
-  { name: '1121 Basmati Rice', slug: 'traditional-1121-basmati-rice', defaultMt: 25, price: '$980/MT' },
-  { name: 'Nashik Red Onions', slug: 'fresh-nashik-red-onions-garwa', defaultMt: 25, price: '$480/MT' },
-  { name: 'Seedless Grapes', slug: 'fresh-thompson-seedless-grapes', defaultMt: 12, price: '$1,850/MT' },
-  { name: 'Pink Guavas', slug: 'fresh-pink-guavas-taiwan-pink', defaultMt: 10, price: '$1,150/MT' },
-  { name: 'Organic Makhana', slug: 'organic-popped-makhana-foxnuts', defaultMt: 5, price: '$8,400/MT' },
+  { name: 'Fresh Green Chilly', slug: 'fresh-g4-green-chillies-pungent', defaultMt: 10 },
+  { name: 'Ruby Pomegranates (Bhagwa)', slug: 'fresh-ruby-red-pomegranates-bhagwa', defaultMt: 18 },
+  { name: '1121 Basmati Rice', slug: 'traditional-1121-basmati-rice', defaultMt: 25 },
+  { name: 'Nashik Red Onions', slug: 'fresh-nashik-red-onions-garwa', defaultMt: 25 },
+  { name: 'Seedless Grapes', slug: 'fresh-thompson-seedless-grapes', defaultMt: 12 },
+  { name: 'Pink Guavas', slug: 'fresh-pink-guavas-taiwan-pink', defaultMt: 10 },
+  { name: 'Organic Makhana', slug: 'organic-popped-makhana-foxnuts', defaultMt: 5 },
 ];
 
 const PORTS = [
@@ -59,7 +59,7 @@ export function QuickOrderBox({ position, className = '' }: QuickOrderBoxProps) 
       layout
       data-position={position}
       transition={{ type: 'spring', damping: 25, stiffness: 120 }}
-      className={`w-[320px] sm:w-[340px] bg-black/60 backdrop-blur-md border border-white/15 rounded-2xl p-4 shadow-2xl text-white text-left ${className}`}
+      className={`w-[352px] sm:w-[374px] max-w-[calc(100vw-2rem)] bg-black/60 backdrop-blur-md border border-white/15 rounded-2xl p-4.5 sm:p-5 shadow-2xl text-white text-left ${className}`}
     >
       {/* Sleek Mode Switcher */}
       <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-white/10">
@@ -95,13 +95,9 @@ export function QuickOrderBox({ position, className = '' }: QuickOrderBoxProps) 
             <span>Sample</span>
           </button>
         </div>
-
-        <span className="text-[10px] text-[#c9a46b] font-medium font-mono">
-          {commodity.price}
-        </span>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-2.5">
+      <form onSubmit={handleSubmit} className="space-y-3">
         {/* Commodity Select */}
         <div>
           <label className="block text-[10px] uppercase font-bold text-white/60 tracking-wider mb-1">
@@ -113,7 +109,7 @@ export function QuickOrderBox({ position, className = '' }: QuickOrderBoxProps) 
               const found = COMMODITIES.find((c) => c.slug === e.target.value);
               if (found) setCommodity(found);
             }}
-            className="w-full bg-white/10 border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a46b] transition-colors"
+            className="w-full bg-white/10 border border-white/15 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#c9a46b] transition-colors"
           >
             {COMMODITIES.map((c) => (
               <option key={c.slug} value={c.slug} className="bg-slate-900 text-white">
@@ -124,7 +120,7 @@ export function QuickOrderBox({ position, className = '' }: QuickOrderBoxProps) 
         </div>
 
         {/* 2-Column Row: Volume + Port */}
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2.5">
           <div>
             <label className="block text-[10px] uppercase font-bold text-white/60 tracking-wider mb-1">
               {orderType === 'bulk' ? 'Volume' : 'Sample Size'}
@@ -133,7 +129,7 @@ export function QuickOrderBox({ position, className = '' }: QuickOrderBoxProps) 
               <select
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                className="w-full bg-white/10 border border-white/15 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a46b]"
+                className="w-full bg-white/10 border border-white/15 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-[#c9a46b]"
               >
                 <option value="10 MT (Min MOQ)" className="bg-slate-900 text-white">10 MT (Min MOQ)</option>
                 <option value="18 MT (40ft Reefer)" className="bg-slate-900 text-white">18 MT (40ft Reefer)</option>
@@ -144,7 +140,7 @@ export function QuickOrderBox({ position, className = '' }: QuickOrderBoxProps) 
               <select
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                className="w-full bg-white/10 border border-white/15 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a46b]"
+                className="w-full bg-white/10 border border-white/15 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-[#c9a46b]"
               >
                 <option value="5 Kg Air Courier" className="bg-slate-900 text-white">5 Kg Box</option>
                 <option value="10 Kg Air Courier" className="bg-slate-900 text-white">10 Kg Box</option>
@@ -160,7 +156,7 @@ export function QuickOrderBox({ position, className = '' }: QuickOrderBoxProps) 
             <select
               value={port}
               onChange={(e) => setPort(e.target.value)}
-              className="w-full bg-white/10 border border-white/15 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-[#c9a46b] truncate"
+              className="w-full bg-white/10 border border-white/15 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-[#c9a46b] truncate"
             >
               {PORTS.map((p) => (
                 <option key={p} value={p} className="bg-slate-900 text-white">
@@ -178,7 +174,7 @@ export function QuickOrderBox({ position, className = '' }: QuickOrderBoxProps) 
             placeholder="Your Email or WhatsApp Phone"
             value={contact}
             onChange={(e) => setContact(e.target.value)}
-            className="w-full bg-white/10 border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-white/40 focus:outline-none focus:border-[#c9a46b]"
+            className="w-full bg-white/10 border border-white/15 rounded-lg px-3 py-2 text-xs text-white placeholder-white/40 focus:outline-none focus:border-[#c9a46b]"
           />
         </div>
 
@@ -186,7 +182,7 @@ export function QuickOrderBox({ position, className = '' }: QuickOrderBoxProps) 
         <div className="flex items-center gap-1.5 pt-1">
           <button
             type="submit"
-            className="flex-1 bg-[#c9a46b] hover:bg-[#b59057] text-[#0b3a40] py-2 rounded-lg font-bold font-headline uppercase text-[11px] shadow transition-colors flex items-center justify-center gap-1"
+            className="flex-1 bg-[#c9a46b] hover:bg-[#b59057] text-[#0b3a40] py-2.5 rounded-lg font-bold font-headline uppercase text-[11px] shadow transition-colors flex items-center justify-center gap-1"
           >
             <span>{orderType === 'bulk' ? 'Place MT Order' : 'Order Sample'}</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -197,7 +193,7 @@ export function QuickOrderBox({ position, className = '' }: QuickOrderBoxProps) 
             target="_blank"
             rel="noopener noreferrer"
             title="Order directly on WhatsApp"
-            className="px-2.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors flex items-center justify-center shrink-0"
+            className="px-3 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors flex items-center justify-center shrink-0"
           >
             <MessageCircle className="w-4 h-4" />
           </a>

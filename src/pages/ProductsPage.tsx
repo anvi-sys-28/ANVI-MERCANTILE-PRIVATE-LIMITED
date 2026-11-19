@@ -1,554 +1,1067 @@
 import { useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Search, 
-  ChevronDown, 
-  Check, 
-  X, 
-  Star, 
+  Heart, 
   ShoppingBag, 
-  ChevronUp,
-  ArrowRight
+  Star, 
+  ArrowRight, 
+  Check 
 } from 'lucide-react';
 import { SEO } from '@/components/global/SEO';
 import { useCart } from '@/context/CartContext';
-import { 
-  organicProductsList, 
-  trustBarItems,
-  type OrganicProduct,
-  type ProductVariant 
-} from '@/data/organicProductsData';
 
-type CategoryFilter = 'All' | 'Fresh Fruits' | 'Vegetables & Roots' | 'Grains & Superfoods';
+// --- TYPES ---
+export interface StoreCategory {
+  id: string;
+  name: string;
+  count: string;
+  filterKey: string;
+  image: string;
+  fallbackImage: string;
+  pillBg: string;
+  pillText: string;
+}
+
+export interface StoreProduct {
+  id: string;
+  name: string;
+  category: 'Vegetables' | 'Fruits' | 'Dairy' | 'Meat' | 'Fresh Fish' | 'Bakery' | 'Snacks';
+  price: string;
+  originalPrice: string;
+  discountBadge: string;
+  rating: number;
+  unit: string;
+  image: string;
+  fallbackImage: string;
+}
+
+// --- CATEGORIES LIST (Shop by Category) ---
+const CATEGORIES: StoreCategory[] = [
+  {
+    id: 'cat-veg',
+    name: 'Vegetables',
+    count: '(50 items)',
+    filterKey: 'Vegetables',
+    image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=300&q=80',
+    fallbackImage: '/images/products/carrots.png',
+    pillBg: 'bg-[#EBF7EE]',
+    pillText: 'text-[#1E3A20]',
+  },
+  {
+    id: 'cat-fruit',
+    name: 'Fruits',
+    count: '(30 items)',
+    filterKey: 'Fruits',
+    image: 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=300&q=80',
+    fallbackImage: '/images/products/apple.png',
+    pillBg: 'bg-[#FFF5E6]',
+    pillText: 'text-[#4A3215]',
+  },
+  {
+    id: 'cat-dairy',
+    name: 'Dairy',
+    count: '(17 items)',
+    filterKey: 'Dairy',
+    image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=300&q=80',
+    fallbackImage: '/images/rice.webp',
+    pillBg: 'bg-[#EBF3FE]',
+    pillText: 'text-[#1D3557]',
+  },
+  {
+    id: 'cat-meat',
+    name: 'Meat',
+    count: '(140 items)',
+    filterKey: 'Meat',
+    image: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=300&q=80',
+    fallbackImage: '/images/pomegranate.webp',
+    pillBg: 'bg-[#FDEEEC]',
+    pillText: 'text-[#5C2424]',
+  },
+  {
+    id: 'cat-fish',
+    name: 'Fresh Fish',
+    count: '(110 items)',
+    filterKey: 'Fresh Fish',
+    image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=300&q=80',
+    fallbackImage: '/images/grapes.webp',
+    pillBg: 'bg-[#FFF0E6]',
+    pillText: 'text-[#5C3218]',
+  },
+  {
+    id: 'cat-bakery',
+    name: 'Bakery',
+    count: '(140 items)',
+    filterKey: 'Bakery',
+    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=300&q=80',
+    fallbackImage: '/images/rice.webp',
+    pillBg: 'bg-[#EFEBFE]',
+    pillText: 'text-[#3D2C58]',
+  },
+  {
+    id: 'cat-snacks',
+    name: 'Snacks',
+    count: '(78 items)',
+    filterKey: 'Snacks',
+    image: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?auto=format&fit=crop&w=300&q=80',
+    fallbackImage: '/images/makhana.webp',
+    pillBg: 'bg-[#FEF5EB]',
+    pillText: 'text-[#543818]',
+  },
+];
+
+// --- TODAY'S BEST DEALS ---
+const BEST_DEALS: StoreProduct[] = [
+  {
+    id: 'deal-strawberries-1',
+    name: 'Organic Red Strawberries',
+    category: 'Fruits',
+    price: '$16.00',
+    originalPrice: '$24.00',
+    discountBadge: '40% OFF',
+    rating: 5.0,
+    unit: '500gm',
+    image: 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/products/apple.png',
+  },
+  {
+    id: 'deal-apples-2',
+    name: 'Farm-Fresh McIntosh Apples',
+    category: 'Fruits',
+    price: '$16.00',
+    originalPrice: '$24.00',
+    discountBadge: '40% OFF',
+    rating: 5.0,
+    unit: '500gm',
+    image: '/images/products/apple.png',
+    fallbackImage: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=500&q=80',
+  },
+  {
+    id: 'deal-strawberries-3',
+    name: 'Organic Red Strawberries',
+    category: 'Fruits',
+    price: '$4.99',
+    originalPrice: '$6.99',
+    discountBadge: '20% OFF',
+    rating: 5.0,
+    unit: '300gm',
+    image: 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/products/blueberries.png',
+  },
+  {
+    id: 'deal-bread-4',
+    name: 'Artisan Sourdough Bread',
+    category: 'Bakery',
+    price: '$3.80',
+    originalPrice: '$4.50',
+    discountBadge: '15% OFF',
+    rating: 5.0,
+    unit: '500gm',
+    image: 'https://images.unsplash.com/photo-1589367920969-ab8e050bbb04?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/rice.webp',
+  },
+];
+
+// --- ALL BEST SELLING PRODUCTS (Grouped by Category) ---
+const BEST_SELLING_PRODUCTS: StoreProduct[] = [
+  // FRUITS (Matches Screenshot)
+  {
+    id: 'prod-lemon-1',
+    name: 'Brightfarms Lemon Seedless',
+    category: 'Fruits',
+    price: '$6.00',
+    originalPrice: '$12.00',
+    discountBadge: '50% OFF',
+    rating: 5.0,
+    unit: '500gm',
+    image: 'https://images.unsplash.com/photo-1536510233921-8e5043fce771?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/guava.webp',
+  },
+  {
+    id: 'prod-papaya-2',
+    name: 'Naturally Sweet Papaya',
+    category: 'Fruits',
+    price: '$4.00',
+    originalPrice: '$8.00',
+    discountBadge: '50% OFF',
+    rating: 4.5,
+    unit: '1 Piece',
+    image: 'https://images.unsplash.com/photo-1517282009859-f000ec3b26fe?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/pomegranate.webp',
+  },
+  {
+    id: 'prod-banana-3',
+    name: 'Farm Fresh Banana',
+    category: 'Fruits',
+    price: '$20.00',
+    originalPrice: '$24.00',
+    discountBadge: '10% OFF',
+    rating: 4.0,
+    unit: '500gm',
+    image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/guava.webp',
+  },
+  {
+    id: 'prod-orange-4',
+    name: 'Sweet & Fresh Oranges',
+    category: 'Fruits',
+    price: '$12.00',
+    originalPrice: '$24.00',
+    discountBadge: '50% OFF',
+    rating: 5.0,
+    unit: '1 kg',
+    image: 'https://images.unsplash.com/photo-1582979512210-99b6a53386f9?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/products/apple.png',
+  },
+  {
+    id: 'prod-pomegranate-5',
+    name: 'Ruby Red Bhagwa Pomegranates',
+    category: 'Fruits',
+    price: '$14.00',
+    originalPrice: '$18.00',
+    discountBadge: '22% OFF',
+    rating: 4.9,
+    unit: '1 kg',
+    image: '/images/pomegranate.webp',
+    fallbackImage: '/images/products/apple.png',
+  },
+  {
+    id: 'prod-grapes-6',
+    name: 'Thompson Seedless Green Grapes',
+    category: 'Fruits',
+    price: '$8.50',
+    originalPrice: '$11.00',
+    discountBadge: '25% OFF',
+    rating: 4.8,
+    unit: '500gm',
+    image: '/images/grapes.webp',
+    fallbackImage: '/images/products/blueberries.png',
+  },
+
+  // VEGETABLES
+  {
+    id: 'prod-veg-broccoli',
+    name: 'Organic Crisp Broccoli',
+    category: 'Vegetables',
+    price: '$3.50',
+    originalPrice: '$5.00',
+    discountBadge: '30% OFF',
+    rating: 4.9,
+    unit: '500gm',
+    image: 'https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/products/carrots.png',
+  },
+  {
+    id: 'prod-veg-carrots',
+    name: 'Farm-Fresh Sweet Carrots',
+    category: 'Vegetables',
+    price: '$2.40',
+    originalPrice: '$3.20',
+    discountBadge: '25% OFF',
+    rating: 4.8,
+    unit: '1 kg',
+    image: '/images/products/carrots.png',
+    fallbackImage: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?auto=format&fit=crop&w=500&q=80',
+  },
+  {
+    id: 'prod-veg-onions',
+    name: 'Nashik Garwa Red Onions',
+    category: 'Vegetables',
+    price: '$2.00',
+    originalPrice: '$3.00',
+    discountBadge: '33% OFF',
+    rating: 4.7,
+    unit: '1 kg',
+    image: '/images/onion.webp',
+    fallbackImage: '/images/products/potatoes.png',
+  },
+  {
+    id: 'prod-veg-chillies',
+    name: 'Fresh Pungent Green Chillies',
+    category: 'Vegetables',
+    price: '$1.80',
+    originalPrice: '$2.50',
+    discountBadge: '28% OFF',
+    rating: 4.9,
+    unit: '250gm',
+    image: '/images/green_chilly.webp',
+    fallbackImage: '/images/chilly.webp',
+  },
+
+  // DAIRY
+  {
+    id: 'prod-dairy-milk',
+    name: 'Farm Fresh Organic Whole Milk',
+    category: 'Dairy',
+    price: '$3.20',
+    originalPrice: '$4.00',
+    discountBadge: '20% OFF',
+    rating: 4.9,
+    unit: '1 Litre',
+    image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/rice.webp',
+  },
+  {
+    id: 'prod-dairy-butter',
+    name: 'Grass-Fed Churned Butter',
+    category: 'Dairy',
+    price: '$4.50',
+    originalPrice: '$6.00',
+    discountBadge: '25% OFF',
+    rating: 5.0,
+    unit: '500gm',
+    image: 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/rice.webp',
+  },
+  {
+    id: 'prod-dairy-cheese',
+    name: 'Artisan Mature Cheddar',
+    category: 'Dairy',
+    price: '$5.80',
+    originalPrice: '$7.50',
+    discountBadge: '22% OFF',
+    rating: 4.8,
+    unit: '250gm',
+    image: 'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/rice.webp',
+  },
+  {
+    id: 'prod-dairy-yogurt',
+    name: 'Greek Plain Probiotic Yogurt',
+    category: 'Dairy',
+    price: '$3.90',
+    originalPrice: '$5.00',
+    discountBadge: '22% OFF',
+    rating: 4.9,
+    unit: '400gm',
+    image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/rice.webp',
+  },
+
+  // BAKERY
+  {
+    id: 'prod-bake-sourdough',
+    name: 'Rustic Artisan Sourdough Loaf',
+    category: 'Bakery',
+    price: '$3.80',
+    originalPrice: '$4.50',
+    discountBadge: '15% OFF',
+    rating: 5.0,
+    unit: '500gm',
+    image: 'https://images.unsplash.com/photo-1589367920969-ab8e050bbb04?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/rice.webp',
+  },
+  {
+    id: 'prod-bake-croissant',
+    name: 'Flaky French Butter Croissants',
+    category: 'Bakery',
+    price: '$4.20',
+    originalPrice: '$6.00',
+    discountBadge: '30% OFF',
+    rating: 4.9,
+    unit: '4 Pieces',
+    image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/rice.webp',
+  },
+  {
+    id: 'prod-bake-baguette',
+    name: 'Stone-Baked French Baguette',
+    category: 'Bakery',
+    price: '$2.80',
+    originalPrice: '$3.50',
+    discountBadge: '20% OFF',
+    rating: 4.7,
+    unit: '1 Piece',
+    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/rice.webp',
+  },
+  {
+    id: 'prod-bake-brioche',
+    name: 'Soft Golden Brioche Buns',
+    category: 'Bakery',
+    price: '$3.90',
+    originalPrice: '$5.00',
+    discountBadge: '22% OFF',
+    rating: 4.8,
+    unit: '6 Pieces',
+    image: 'https://images.unsplash.com/photo-1620921575116-b8cb837c7ce3?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/rice.webp',
+  },
+
+  // FRESH FISH
+  {
+    id: 'prod-fish-salmon',
+    name: 'Fresh Atlantic Salmon Fillet',
+    category: 'Fresh Fish',
+    price: '$14.50',
+    originalPrice: '$18.00',
+    discountBadge: '19% OFF',
+    rating: 5.0,
+    unit: '500gm',
+    image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/rice.webp',
+  },
+  {
+    id: 'prod-fish-seabass',
+    name: 'Wild Mediterranean Sea Bass',
+    category: 'Fresh Fish',
+    price: '$12.00',
+    originalPrice: '$15.00',
+    discountBadge: '20% OFF',
+    rating: 4.8,
+    unit: '800gm',
+    image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/rice.webp',
+  },
+  {
+    id: 'prod-fish-prawns',
+    name: 'Jumbo Ocean Tiger Prawns',
+    category: 'Fresh Fish',
+    price: '$16.00',
+    originalPrice: '$20.00',
+    discountBadge: '20% OFF',
+    rating: 4.9,
+    unit: '500gm',
+    image: 'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/rice.webp',
+  },
+  {
+    id: 'prod-fish-pomfret',
+    name: 'Whole Cleaned Silver Pomfret',
+    category: 'Fresh Fish',
+    price: '$11.50',
+    originalPrice: '$14.00',
+    discountBadge: '18% OFF',
+    rating: 4.8,
+    unit: '1 kg',
+    image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/rice.webp',
+  },
+
+  // MEAT
+  {
+    id: 'prod-meat-steak',
+    name: 'Prime Grass-Fed Beef Ribeye',
+    category: 'Meat',
+    price: '$16.00',
+    originalPrice: '$24.00',
+    discountBadge: '40% OFF',
+    rating: 5.0,
+    unit: '500gm',
+    image: 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/pomegranate.webp',
+  },
+  {
+    id: 'prod-meat-chicken',
+    name: 'Free-Range Tender Chicken Breast',
+    category: 'Meat',
+    price: '$8.50',
+    originalPrice: '$11.00',
+    discountBadge: '22% OFF',
+    rating: 4.9,
+    unit: '1 kg',
+    image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/pomegranate.webp',
+  },
+  {
+    id: 'prod-meat-lamb',
+    name: 'Tender Cut Lamb Chops',
+    category: 'Meat',
+    price: '$15.00',
+    originalPrice: '$20.00',
+    discountBadge: '25% OFF',
+    rating: 4.8,
+    unit: '500gm',
+    image: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/pomegranate.webp',
+  },
+  {
+    id: 'prod-meat-veal',
+    name: 'Prime Veal Escalopes',
+    category: 'Meat',
+    price: '$16.50',
+    originalPrice: '$21.00',
+    discountBadge: '21% OFF',
+    rating: 4.9,
+    unit: '600gm',
+    image: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/pomegranate.webp',
+  },
+
+  // SNACKS
+  {
+    id: 'prod-snack-makhana',
+    name: 'Organic Roasted Foxnuts (Makhana)',
+    category: 'Snacks',
+    price: '$4.50',
+    originalPrice: '$6.00',
+    discountBadge: '25% OFF',
+    rating: 5.0,
+    unit: '200gm',
+    image: '/images/makhana.webp',
+    fallbackImage: '/images/rice.webp',
+  },
+  {
+    id: 'prod-snack-almonds',
+    name: 'California Salted Roasted Almonds',
+    category: 'Snacks',
+    price: '$6.00',
+    originalPrice: '$8.00',
+    discountBadge: '25% OFF',
+    rating: 4.9,
+    unit: '250gm',
+    image: 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/makhana.webp',
+  },
+  {
+    id: 'prod-snack-chips',
+    name: 'Crispy Kerala Banana Wafers',
+    category: 'Snacks',
+    price: '$3.20',
+    originalPrice: '$4.50',
+    discountBadge: '28% OFF',
+    rating: 4.8,
+    unit: '200gm',
+    image: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/makhana.webp',
+  },
+  {
+    id: 'prod-snack-nuts',
+    name: 'Dried Fruit & Nut Medley Pack',
+    category: 'Snacks',
+    price: '$7.00',
+    originalPrice: '$9.50',
+    discountBadge: '26% OFF',
+    rating: 4.9,
+    unit: '300gm',
+    image: 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&fit=crop&w=500&q=80',
+    fallbackImage: '/images/makhana.webp',
+  },
+];
+
+const FILTER_TABS = [
+  'All Products',
+  'Vegetables',
+  'Fruits',
+  'Dairy',
+  'Bakery',
+  'Fresh Fish',
+  'Meat',
+];
 
 export default function ProductsPage() {
-  const { addItem, totalCount, openCart } = useCart();
+  const { addItem, openCart } = useCart();
 
-  const [selectedProduct, setSelectedProduct] = useState<OrganicProduct>(organicProductsList[0]);
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant>(organicProductsList[0].variants[0]);
-  const [quantity, setQuantity] = useState<number>(1);
-  const [openAccordion, setOpenAccordion] = useState<string>('description');
-  const [showReview, setShowReview] = useState<boolean>(true);
-  const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
-  const [activeCategory, setActiveCategory] = useState<CategoryFilter>('All');
+  // Active category filter tab (Matches the screenshot where 'Fruits' is active)
+  const [activeCategory, setActiveCategory] = useState<string>('Fruits');
 
-  const topSectionRef = useRef<HTMLDivElement>(null);
+  // Wishlist heart toggle set
+  const [wishlist, setWishlist] = useState<Set<string>>(new Set());
 
-  // Filtered commodities for Section 2
+  // Recently added animation indicator
+  const [addedItem, setAddedItem] = useState<StoreProduct | null>(null);
+
+  const bestSellingRef = useRef<HTMLDivElement>(null);
+
+  // Filter products for Section 4
   const filteredProducts = useMemo(() => {
-    if (activeCategory === 'All') return organicProductsList;
-    return organicProductsList.filter(p => p.category === activeCategory);
+    if (activeCategory === 'All Products') {
+      return BEST_SELLING_PRODUCTS;
+    }
+    return BEST_SELLING_PRODUCTS.filter((p) => p.category === activeCategory);
   }, [activeCategory]);
 
-  // Switch spotlight product when clicked from bottom grid
-  const handleSelectProduct = (product: OrganicProduct) => {
-    setSelectedProduct(product);
-    setSelectedVariant(product.variants[0]);
-    setQuantity(1);
-    setOpenAccordion('description');
-    
-    // Smooth scroll to top spotlight section
-    if (topSectionRef.current) {
-      topSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+  const toggleWishlist = (productId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setWishlist((prev) => {
+      const next = new Set(prev);
+      if (next.has(productId)) {
+        next.delete(productId);
+      } else {
+        next.add(productId);
+      }
+      return next;
+    });
   };
 
-  // Add to cart handler
-  const handleAddToCart = () => {
-    const variantName = selectedVariant.label !== 'Choose an option' 
-      ? selectedVariant.label 
-      : (selectedProduct.variants[1]?.label || 'Standard Order');
-
-    const variantPrice = selectedVariant.price || selectedProduct.variants[1]?.price || selectedProduct.priceRange;
-
+  const handleAddToCart = (product: StoreProduct) => {
+    const numericPrice = parseFloat(product.price.replace('$', '')) || 0;
+    
     addItem({
-      productId: selectedProduct.id,
-      name: selectedProduct.name,
-      image: selectedProduct.image,
-      variantLabel: variantName,
-      priceDisplay: variantPrice,
-      unitPriceUsd: 0,
-      quantity,
-      category: selectedProduct.category,
+      productId: product.id,
+      name: product.name,
+      image: product.image,
+      variantLabel: product.unit,
+      priceDisplay: product.price,
+      unitPriceUsd: numericPrice,
+      quantity: 1,
+      category: product.category,
     });
+
+    setAddedItem(product);
+    setTimeout(() => {
+      setAddedItem((current) => (current?.id === product.id ? null : current));
+    }, 2800);
+  };
+
+  const handleCategoryClick = (categoryName: string) => {
+    setActiveCategory(categoryName);
+    if (bestSellingRef.current) {
+      bestSellingRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   return (
     <>
       <SEO
-        title="Explore Agro Export Commodities & Fresh Produce | Anvi Mercantile"
-        description="Explore fresh fruits, vegetables, Basmati rice, and agro commodities. Order retail packs, export air sample boxes, or full refrigerated container loads (FCL) directly from verified Indian packhouses."
+        title="Fresh Produce & Grocery Store | Anvi Mercantile"
+        description="Shop fresh fruits, vegetables, dairy, artisan bakery, fresh fish, and premium groceries directly from certified farms with fast delivery."
       />
 
-      <div className="w-full font-sans antialiased selection:bg-[#807562]/20 selection:text-[#1F1E1B]">
-        
-        {/* ========================================================= */}
-        {/* SECTION 1: TOP SPOTLIGHT / PRODUCT DETAIL & ORDERING      */}
-        {/* ========================================================= */}
-        <section 
-          ref={topSectionRef}
-          style={{ backgroundColor: '#F1E5C8' }} 
-          className="pt-28 sm:pt-32 lg:pt-36 pb-14 sm:pb-16 px-4 sm:px-6 lg:px-12 text-[#1F1E1B] transition-colors duration-300"
-        >
-          <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-start">
-              
-              {/* LEFT COLUMN: TITLE, PRICE, VARIANT, QUANTITY, BREADCRUMB, STAT */}
-              <div className="lg:col-span-4 flex flex-col justify-between pt-2">
-                <div>
-                  {/* Category Pill Tag */}
-                  <div className="inline-block bg-[#807562]/15 text-[#6D6352] text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-3">
-                    {selectedProduct.category}
-                  </div>
+      <div className="min-h-screen bg-white text-gray-900 font-sans antialiased pt-24 sm:pt-28 pb-20 selection:bg-emerald-100 selection:text-emerald-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 sm:space-y-16">
 
-                  {/* Big Headline */}
-                  <h1 className="text-3xl sm:text-4xl lg:text-[40px] font-bold text-[#1F1E1B] leading-[1.12] tracking-tight">
-                    {selectedProduct.name}
-                  </h1>
-
-                  {/* Price Range */}
-                  <div className="text-xl sm:text-2xl font-medium text-[#222222] mt-3 sm:mt-4 mb-6">
-                    {selectedVariant.price ? selectedVariant.price : selectedProduct.priceRange}
-                  </div>
-
-                  {/* Amount / Variant Selector */}
-                  <div className="mb-5">
-                    <label 
-                      htmlFor="amount-select" 
-                      className="block text-xs font-normal text-[#5A554D] mb-1.5"
-                    >
-                      Amount / Pack Size
-                    </label>
-                    <div className="relative inline-block w-full max-w-[320px]">
-                      <select
-                        id="amount-select"
-                        value={selectedVariant.label}
-                        onChange={(e) => {
-                          const found = selectedProduct.variants.find(v => v.label === e.target.value);
-                          if (found) setSelectedVariant(found);
-                        }}
-                        className="w-full appearance-none bg-white border border-[#D5CBC0] text-[#333333] text-xs sm:text-sm rounded-full py-2.5 pl-4 pr-10 shadow-xs focus:outline-none focus:ring-1 focus:ring-[#807562] cursor-pointer"
-                      >
-                        {selectedProduct.variants.map((v) => (
-                          <option key={v.label} value={v.label}>
-                            {v.label}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown 
-                        size={16} 
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#7A746B] pointer-events-none" 
-                      />
-                    </div>
-                  </div>
-
-                  {/* Quantity Stepper & Add To Cart Button */}
-                  <div className="flex items-center gap-3 mb-6">
-                    {/* Stepper Pill */}
-                    <div className="bg-white border border-[#D5CBC0] rounded-full px-3 py-1.5 flex items-center gap-2 shadow-xs">
-                      <span className="text-xs sm:text-sm font-semibold text-[#222222] w-5 text-center select-none">
-                        {quantity}
-                      </span>
-                      <div className="flex flex-col gap-0.5 border-l border-stone-200 pl-1.5">
-                        <button
-                          type="button"
-                          onClick={() => setQuantity(q => q + 1)}
-                          className="text-[#555] hover:text-black p-0.5 leading-none transition-colors cursor-pointer"
-                          aria-label="Increase quantity"
-                        >
-                          <ChevronUp size={11} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                          className="text-[#555] hover:text-black p-0.5 leading-none transition-colors cursor-pointer"
-                          aria-label="Decrease quantity"
-                        >
-                          <ChevronDown size={11} />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Add To Cart Pill Button */}
-                    <button
-                      type="button"
-                      onClick={handleAddToCart}
-                      style={{ backgroundColor: '#807562' }}
-                      className="hover:opacity-90 active:scale-98 text-white text-xs sm:text-sm font-medium px-7 py-2.5 rounded-full shadow-xs transition-all cursor-pointer inline-flex items-center gap-2"
-                    >
-                      <ShoppingBag size={14} />
-                      <span>Add To Cart</span>
-                    </button>
-                  </div>
-
-                  {/* Breadcrumb line */}
-                  <nav aria-label="Breadcrumb" className="text-xs text-[#7A746B] mb-10 leading-relaxed font-normal">
-                    {selectedProduct.breadcrumb}
-                  </nav>
-                </div>
-
-                {/* Big Stat Highlight */}
-                <div className="mt-4 sm:mt-8">
-                  <div className="text-5xl sm:text-6xl font-bold text-[#6D6352] tracking-tight leading-none">
-                    {selectedProduct.statNumber}
-                  </div>
-                  <div className="text-sm font-medium text-[#7A746B] mt-1.5">
-                    {selectedProduct.statLabel}
-                  </div>
-                </div>
-              </div>
-
-              {/* CENTER COLUMN: WHITE ROUNDED CARD WITH PRODUCE IMAGE */}
-              <div className="lg:col-span-5 flex justify-center items-center">
-                <div className="relative w-full max-w-[430px] aspect-square bg-white rounded-[32px] sm:rounded-[36px] shadow-sm border border-[#E5DACD]/60 flex items-center justify-center p-6 sm:p-8 overflow-hidden group">
-                  
-                  {/* Magnifying Glass Icon (top right) */}
-                  <button
-                    type="button"
-                    onClick={() => setIsLightboxOpen(true)}
-                    className="absolute top-5 right-5 p-2 text-[#7A746B] hover:text-[#1F1E1B] transition-colors rounded-full hover:bg-stone-50 cursor-pointer z-10"
-                    aria-label="Zoom image"
-                  >
-                    <Search size={18} strokeWidth={2} />
-                  </button>
-
-                  {/* Product Image */}
-                  <AnimatePresence mode="wait">
-                    <motion.img
-                      key={selectedProduct.id}
-                      src={selectedProduct.image}
-                      alt={selectedProduct.altText}
-                      initial={{ opacity: 0, scale: 0.94 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.96 }}
-                      transition={{ duration: 0.35, ease: 'easeOut' }}
-                      className="w-full h-full object-contain p-2 group-hover:scale-104 transition-transform duration-500 ease-out select-none"
-                    />
-                  </AnimatePresence>
-                </div>
-              </div>
-
-              {/* RIGHT COLUMN: ACCORDION LIST & FLOATING REVIEW BADGE */}
-              <div className="lg:col-span-3 flex flex-col justify-between pt-1">
-                {/* Minimalist Accordion */}
-                <div className="divide-y divide-[#DCD2C4] border-t border-b border-[#DCD2C4]">
-                  
-                  {/* 1. Description */}
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setOpenAccordion(openAccordion === 'description' ? '' : 'description')}
-                      className="w-full py-3 flex items-center justify-between text-left text-xs sm:text-sm font-semibold text-[#1F1E1B] hover:text-[#000] cursor-pointer"
-                    >
-                      <span>Description</span>
-                      <span className="text-base font-light text-[#555] ml-2">
-                        {openAccordion === 'description' ? '−' : '+'}
-                      </span>
-                    </button>
-                    {openAccordion === 'description' && (
-                      <p className="text-xs sm:text-[13px] text-[#5A554D] leading-relaxed pb-3.5 pt-0.5">
-                        {selectedProduct.accordion.description}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* 2. Ingredients / Variety */}
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setOpenAccordion(openAccordion === 'ingredients' ? '' : 'ingredients')}
-                      className="w-full py-3 flex items-center justify-between text-left text-xs sm:text-sm font-semibold text-[#1F1E1B] hover:text-[#000] cursor-pointer"
-                    >
-                      <span>Grade & Origin</span>
-                      <span className="text-base font-light text-[#555] ml-2">
-                        {openAccordion === 'ingredients' ? '−' : '+'}
-                      </span>
-                    </button>
-                    {openAccordion === 'ingredients' && (
-                      <p className="text-xs sm:text-[13px] text-[#5A554D] leading-relaxed pb-3.5 pt-0.5">
-                        {selectedProduct.accordion.ingredients}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* 3. Port Loading & Logistics */}
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setOpenAccordion(openAccordion === 'freePickup' ? '' : 'freePickup')}
-                      className="w-full py-3 flex items-center justify-between text-left text-xs sm:text-sm font-semibold text-[#1F1E1B] hover:text-[#000] cursor-pointer"
-                    >
-                      <span>Port Loading & Shipping</span>
-                      <span className="text-base font-light text-[#555] ml-2">
-                        {openAccordion === 'freePickup' ? '−' : '+'}
-                      </span>
-                    </button>
-                    {openAccordion === 'freePickup' && (
-                      <p className="text-xs sm:text-[13px] text-[#5A554D] leading-relaxed pb-3.5 pt-0.5">
-                        {selectedProduct.accordion.freePickup}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* 4. Quality & APEDA Standards */}
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setOpenAccordion(openAccordion === 'premiumQuality' ? '' : 'premiumQuality')}
-                      className="w-full py-3 flex items-center justify-between text-left text-xs sm:text-sm font-semibold text-[#1F1E1B] hover:text-[#000] cursor-pointer"
-                    >
-                      <span>Quality & Inspection</span>
-                      <span className="text-base font-light text-[#555] ml-2">
-                        {openAccordion === 'premiumQuality' ? '−' : '+'}
-                      </span>
-                    </button>
-                    {openAccordion === 'premiumQuality' && (
-                      <p className="text-xs sm:text-[13px] text-[#5A554D] leading-relaxed pb-3.5 pt-0.5">
-                        {selectedProduct.accordion.premiumQuality}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* 5. Packaging & Cold Chain */}
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setOpenAccordion(openAccordion === 'organicFairTrade' ? '' : 'organicFairTrade')}
-                      className="w-full py-3 flex items-center justify-between text-left text-xs sm:text-sm font-semibold text-[#1F1E1B] hover:text-[#000] cursor-pointer"
-                    >
-                      <span>Packaging & Cold Chain</span>
-                      <span className="text-base font-light text-[#555] ml-2">
-                        {openAccordion === 'organicFairTrade' ? '−' : '+'}
-                      </span>
-                    </button>
-                    {openAccordion === 'organicFairTrade' && (
-                      <p className="text-xs sm:text-[13px] text-[#5A554D] leading-relaxed pb-3.5 pt-0.5">
-                        {selectedProduct.accordion.organicFairTrade}
-                      </p>
-                    )}
-                  </div>
-
-                </div>
-
-                {/* Floating Testimonial Card */}
-                {showReview && selectedProduct.review && (
-                  <div className="mt-8 sm:mt-10 self-end w-full max-w-[270px]">
-                    <div className="bg-white rounded-2xl p-3 shadow-md border border-[#E5DACD]/80 relative transition-transform hover:scale-[1.02]">
-                      <button
-                        type="button"
-                        onClick={() => setShowReview(false)}
-                        className="absolute top-2.5 right-2.5 text-[#999] hover:text-[#333] transition-colors p-0.5 cursor-pointer"
-                        aria-label="Dismiss review"
-                      >
-                        <X size={13} />
-                      </button>
-
-                      <div className="flex items-center gap-2.5 mb-1.5">
-                        <img 
-                          src={selectedProduct.review.avatar} 
-                          alt={selectedProduct.review.author} 
-                          className="w-7 h-7 rounded-full object-cover border border-stone-200"
-                        />
-                        <div>
-                          <div className="text-xs font-semibold text-[#1F1E1B] leading-none">
-                            {selectedProduct.review.author}
-                          </div>
-                          <div className="flex items-center gap-0.5 mt-0.5 text-emerald-700">
-                            {[...Array(selectedProduct.review.rating)].map((_, i) => (
-                              <Star key={i} size={9} fill="currentColor" />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-
-                      <p className="text-[11px] text-[#666666] leading-snug line-clamp-2">
-                        {selectedProduct.review.text}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
+          {/* ========================================================= */}
+          {/* SECTION 1: SHOP BY CATEGORY                               */}
+          {/* ========================================================= */}
+          <section className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-gray-900 tracking-tight">
+                Shop by Category
+              </h2>
+              <button
+                type="button"
+                onClick={() => handleCategoryClick('All Products')}
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer group"
+              >
+                <span>All Categories</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
             </div>
-          </div>
-        </section>
 
-        {/* ========================================================= */}
-        {/* VALUE PROPS / TRUST DIVIDER BAR                           */}
-        {/* ========================================================= */}
-        <section 
-          style={{ backgroundColor: '#1F2420' }} 
-          className="text-stone-100 py-4 px-4 sm:px-6 lg:px-8 border-y border-stone-800"
-        >
-          <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 items-center">
-              {trustBarItems.map((item) => (
-                <div key={item} className="flex items-center gap-2 text-xs sm:text-[13px] font-normal tracking-wide text-stone-200">
-                  <Check size={14} className="text-emerald-400 shrink-0 stroke-[2.5]" />
-                  <span>{item}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ========================================================= */}
-        {/* SECTION 2: "Do you also have" / EXPLORE PRODUCTS GRID     */}
-        {/* ========================================================= */}
-        <section 
-          style={{ backgroundColor: '#FAF4F1' }} 
-          className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 text-[#1F1E1B]"
-        >
-          <div className="max-w-7xl mx-auto">
-            
-            {/* Centered Heading */}
-            <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-semibold text-[#1F1E1B] text-center mb-6 tracking-tight">
-              Do you also have
-            </h2>
-
-            {/* Category Filter Tabs */}
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-10 sm:mb-12">
-              {(['All', 'Fresh Fruits', 'Vegetables & Roots', 'Grains & Superfoods'] as const).map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setActiveCategory(cat)}
-                  className={`text-xs sm:text-sm font-semibold px-4 py-2 rounded-full transition-all cursor-pointer ${
-                    activeCategory === cat
-                      ? 'bg-[#242623] text-white shadow-xs'
-                      : 'bg-stone-200/60 hover:bg-stone-300/80 text-stone-700'
-                  }`}
+            {/* 7 Category Cards Row */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
+              {CATEGORIES.map((cat) => (
+                <div
+                  key={cat.id}
+                  onClick={() => handleCategoryClick(cat.filterKey)}
+                  className="bg-white border border-gray-100/90 rounded-2xl p-2.5 sm:p-3 flex flex-col items-center justify-between shadow-xs hover:shadow-md hover:border-gray-200 transition-all cursor-pointer group hover:-translate-y-1"
                 >
-                  {cat === 'All' ? `All Products (${organicProductsList.length})` : cat}
-                </button>
+                  {/* Category Image */}
+                  <div className="h-16 sm:h-20 w-full flex items-center justify-center p-1 overflow-hidden">
+                    <img
+                      src={cat.image}
+                      alt={cat.name}
+                      onError={(e) => {
+                        e.currentTarget.src = cat.fallbackImage;
+                      }}
+                      className="max-h-full max-w-full object-contain group-hover:scale-108 transition-transform duration-300 drop-shadow-xs"
+                      loading="lazy"
+                    />
+                  </div>
+
+                  {/* Category Pill with Name & Count */}
+                  <div
+                    className={`w-full text-center py-1.5 px-1 rounded-xl mt-2 transition-colors ${cat.pillBg} ${cat.pillText}`}
+                  >
+                    <span className="font-bold text-xs block leading-tight">
+                      {cat.name}
+                    </span>
+                    <span className="text-[10px] text-gray-500 font-normal block mt-0.5 leading-none">
+                      {cat.count}
+                    </span>
+                  </div>
+                </div>
               ))}
             </div>
+          </section>
 
-            {/* Product Cards Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4 lg:gap-5">
-              {filteredProducts.map((product) => {
-                const isCurrentActive = selectedProduct.id === product.id;
+          {/* ========================================================= */}
+          {/* SECTION 2: TODAY'S BEST DEALS                             */}
+          {/* ========================================================= */}
+          <section className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-gray-900 tracking-tight">
+                Today's Best Deals
+              </h2>
+              <button
+                type="button"
+                onClick={() => handleCategoryClick('All Products')}
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer group"
+              >
+                <span>View All</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+
+            {/* 4 Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {BEST_DEALS.map((deal) => {
+                const isFavorite = wishlist.has(deal.id);
+                const isJustAdded = addedItem?.id === deal.id;
+
                 return (
                   <div
-                    key={product.id}
-                    onClick={() => handleSelectProduct(product)}
-                    style={{ backgroundColor: '#F0E1CA' }}
-                    className={`rounded-[26px] p-3 text-center flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg cursor-pointer ${
-                      isCurrentActive ? 'ring-2 ring-[#807562] shadow-md' : 'shadow-xs'
-                    }`}
+                    key={deal.id}
+                    className="bg-white border border-gray-150 rounded-2xl p-4 shadow-xs hover:shadow-lg hover:border-gray-300 transition-all flex flex-col justify-between group relative"
                   >
-                    {/* White Rounded Square for Image */}
-                    <div className="bg-white rounded-[20px] aspect-square flex items-center justify-center p-3 mb-3 shadow-inner overflow-hidden">
+                    {/* Top Row: Discount Badge & Wishlist Heart */}
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="bg-[#EA4B48] text-white text-[10px] font-bold px-2 py-0.5 rounded tracking-wide uppercase">
+                        {deal.discountBadge}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => toggleWishlist(deal.id, e)}
+                        className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-gray-100 transition-colors cursor-pointer"
+                        aria-label="Save to Wishlist"
+                      >
+                        <Heart
+                          className={`w-4 h-4 ${
+                            isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* Centered Image */}
+                    <div className="h-36 sm:h-44 w-full flex items-center justify-center p-2 my-1 overflow-hidden">
                       <img
-                        src={product.image}
-                        alt={product.altText}
-                        className="w-full h-full object-contain hover:scale-106 transition-transform duration-300"
+                        src={deal.image}
+                        alt={deal.name}
+                        onError={(e) => {
+                          e.currentTarget.src = deal.fallbackImage;
+                        }}
+                        className="max-h-full max-w-full object-contain group-hover:scale-106 transition-transform duration-300 drop-shadow-xs"
                         loading="lazy"
                       />
                     </div>
 
-                    {/* Product Name */}
-                    <h3 className="text-xs sm:text-sm font-semibold text-[#1F1E1B] line-clamp-2 leading-snug px-1 mb-1 min-h-[36px] flex items-center justify-center">
-                      {product.name}
-                    </h3>
+                    {/* Details */}
+                    <div className="space-y-1.5 pt-2">
+                      <h3 className="font-bold text-sm sm:text-base text-gray-900 line-clamp-1 group-hover:text-emerald-700 transition-colors">
+                        {deal.name}
+                      </h3>
 
-                    {/* Price Range */}
-                    <div className="text-xs sm:text-[13px] font-normal text-[#444444] mb-3">
-                      {product.priceRange}
+                      {/* Price and Rating */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="font-extrabold text-gray-900 text-sm sm:text-base">
+                            {deal.price}
+                          </span>
+                          <span className="text-xs text-gray-400 line-through">
+                            {deal.originalPrice}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
+                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                          <span>({deal.rating.toFixed(1)})</span>
+                        </div>
+                      </div>
+
+                      {/* Bottom Action Row: Unit + Add to Cart */}
+                      <div className="flex items-center justify-between pt-2">
+                        <span className="text-xs text-gray-400 font-medium">
+                          {deal.unit}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleAddToCart(deal)}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer shadow-2xs ${
+                            isJustAdded
+                              ? 'bg-emerald-600 border-emerald-600 text-white'
+                              : 'border-emerald-500/30 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700'
+                          }`}
+                        >
+                          {isJustAdded ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                              <span>Added</span>
+                            </>
+                          ) : (
+                            <>
+                              <ShoppingBag className="w-3.5 h-3.5" />
+                              <span>Add to Cart</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
                     </div>
-
-                    {/* Select Options Pill Button */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSelectProduct(product);
-                      }}
-                      style={{ backgroundColor: '#242623' }}
-                      className="w-full text-white text-[11px] sm:text-xs font-semibold py-2 px-3 rounded-full hover:bg-black active:scale-98 transition-all cursor-pointer"
-                    >
-                      Select Options
-                    </button>
                   </div>
                 );
               })}
             </div>
+          </section>
 
-            {/* Quick Link to Anvi Trade Routes */}
-            <div className="mt-14 text-center">
-              <p className="text-xs sm:text-sm text-[#7A746B] mb-3">
-                Need customized chartering, multi-container contracts, or special port discharge arrangements?
-              </p>
-              <a
-                href="/trade"
-                className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#1F1E1B] hover:text-[#807562] underline underline-offset-4 transition-colors"
-              >
-                <span>Explore International Maritime Shipping Routes</span>
-                <ArrowRight size={14} />
-              </a>
+          {/* ========================================================= */}
+          {/* SECTION 3: PROMOTIONAL BANNERS (2 Cards Side-by-Side)     */}
+          {/* ========================================================= */}
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Left Banner: Fresh & Organic Fruits */}
+            <div className="bg-gradient-to-br from-[#FFF9EA] via-[#FFF5DE] to-[#FDF0CE] border border-amber-200/50 rounded-3xl p-6 sm:p-8 flex items-center justify-between overflow-hidden relative shadow-xs group">
+              <div className="space-y-2 z-10 max-w-[58%]">
+                <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-gray-900 leading-tight">
+                  Fresh &amp; Organic Fruits
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-600 font-medium">
+                  100% Farm-to-Table Quality
+                </p>
+                <div className="pt-2">
+                  <span className="text-lg sm:text-xl font-black text-gray-950">
+                    $14.99
+                  </span>
+                  <span className="text-xs text-gray-500 font-medium ml-1">
+                    /Only
+                  </span>
+                </div>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => handleCategoryClick('Fruits')}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-xl text-xs sm:text-sm shadow-sm transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
+                  >
+                    Shop Now
+                  </button>
+                </div>
+              </div>
+
+              {/* Right Fruit Arrangement */}
+              <div className="w-[42%] flex items-center justify-end z-10">
+                <img
+                  src="https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=600&q=80"
+                  alt="Fresh & Organic Fruits Basket"
+                  onError={(e) => {
+                    e.currentTarget.src = '/images/products/apple.png';
+                  }}
+                  className="max-h-36 sm:max-h-48 w-auto object-contain drop-shadow-md group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
+              </div>
+
+              {/* Subtle ambient circle */}
+              <div className="absolute -right-12 -bottom-12 w-48 h-48 bg-amber-300/20 rounded-full blur-2xl pointer-events-none" />
             </div>
 
-          </div>
-        </section>
+            {/* Right Banner: Shop the Best Organic Vegetables */}
+            <div className="bg-gradient-to-br from-[#EFF9F1] via-[#E6F6E9] to-[#DCF5E1] border border-emerald-200/50 rounded-3xl p-6 sm:p-8 flex items-center justify-between overflow-hidden relative shadow-xs group">
+              <div className="space-y-2 z-10 max-w-[58%]">
+                <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-gray-900 leading-tight">
+                  Shop the Best Organic Vegetables
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-600 font-medium">
+                  Pure taste and nutrition in every bite.
+                </p>
+                <div className="pt-2">
+                  <span className="text-lg sm:text-xl font-black text-gray-950">
+                    $12.99
+                  </span>
+                  <span className="text-xs text-gray-500 font-medium ml-1">
+                    /Only
+                  </span>
+                </div>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => handleCategoryClick('Vegetables')}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-xl text-xs sm:text-sm shadow-sm transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
+                  >
+                    Shop Now
+                  </button>
+                </div>
+              </div>
 
-      </div>
+              {/* Right Vegetables Arrangement */}
+              <div className="w-[42%] flex items-center justify-end z-10">
+                <img
+                  src="https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80"
+                  alt="Organic Crisp Vegetables"
+                  onError={(e) => {
+                    e.currentTarget.src = '/images/products/carrots.png';
+                  }}
+                  className="max-h-36 sm:max-h-48 w-auto object-contain drop-shadow-md group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
+              </div>
 
-      {/* ========================================================= */}
-      {/* FLOATING QUICK CART PILL BUTTON                           */}
-      {/* ========================================================= */}
-      <div className="fixed bottom-6 right-6 z-40">
-        <button
-          type="button"
-          onClick={openCart}
-          className="bg-[#242623] hover:bg-black text-white text-xs sm:text-sm font-semibold py-3 px-5 rounded-full shadow-2xl border border-stone-700 flex items-center gap-2.5 transition-all hover:scale-105 cursor-pointer"
-        >
-          <ShoppingBag size={16} />
-          <span>View Export Cart</span>
-          {totalCount > 0 && (
-            <span className="bg-emerald-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-              {totalCount}
-            </span>
-          )}
-        </button>
-      </div>
+              {/* Subtle ambient circle */}
+              <div className="absolute -right-12 -bottom-12 w-48 h-48 bg-emerald-300/20 rounded-full blur-2xl pointer-events-none" />
+            </div>
 
-      {/* ========================================================= */}
-      {/* HIGH RESOLUTION LIGHTBOX                                  */}
-      {/* ========================================================= */}
-      <AnimatePresence>
-        {isLightboxOpen && (
-          <div 
-            onClick={() => setIsLightboxOpen(false)}
-            className="fixed inset-0 z-60 bg-black/85 backdrop-blur-md flex items-center justify-center p-6 cursor-zoom-out"
-          >
+          </section>
+
+          {/* ========================================================= */}
+          {/* SECTION 4: BEST SELLING PRODUCTS                          */}
+          {/* ========================================================= */}
+          <section ref={bestSellingRef} className="space-y-6 pt-4">
+            
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-gray-900 tracking-tight">
+              Best Selling Products
+            </h2>
+
+            {/* Filter Tabs Bar (Matches Screenshot) */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+              {FILTER_TABS.map((tab) => {
+                const isActive = activeCategory === tab;
+
+                return (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setActiveCategory(tab)}
+                    className={`px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                      isActive
+                        ? 'border border-emerald-600 bg-[#EBF7EE] text-emerald-700 shadow-2xs'
+                        : 'border border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Filtered Products Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              <AnimatePresence mode="popLayout">
+                {filteredProducts.map((product) => {
+                  const isFavorite = wishlist.has(product.id);
+                  const isJustAdded = addedItem?.id === product.id;
+
+                  return (
+                    <motion.div
+                      key={product.id}
+                      layout
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="bg-white border border-gray-150 rounded-2xl p-4 shadow-xs hover:shadow-lg hover:border-gray-300 transition-all flex flex-col justify-between group relative"
+                    >
+                      {/* Top Row: Discount Badge & Wishlist Heart */}
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="bg-[#EA4B48] text-white text-[10px] font-bold px-2 py-0.5 rounded tracking-wide uppercase">
+                          {product.discountBadge}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={(e) => toggleWishlist(product.id, e)}
+                          className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-gray-100 transition-colors cursor-pointer"
+                          aria-label="Save to Wishlist"
+                        >
+                          <Heart
+                            className={`w-4 h-4 ${
+                              isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'
+                            }`}
+                          />
+                        </button>
+                      </div>
+
+                      {/* Centered Image */}
+                      <div className="h-36 sm:h-44 w-full flex items-center justify-center p-2 my-1 overflow-hidden">
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          onError={(e) => {
+                            e.currentTarget.src = product.fallbackImage;
+                          }}
+                          className="max-h-full max-w-full object-contain group-hover:scale-106 transition-transform duration-300 drop-shadow-xs"
+                          loading="lazy"
+                        />
+                      </div>
+
+                      {/* Details */}
+                      <div className="space-y-1.5 pt-2">
+                        <h3 className="font-bold text-sm sm:text-base text-gray-900 line-clamp-1 group-hover:text-emerald-700 transition-colors">
+                          {product.name}
+                        </h3>
+
+                        {/* Price and Rating */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="font-extrabold text-gray-900 text-sm sm:text-base">
+                              {product.price}
+                            </span>
+                            <span className="text-xs text-gray-400 line-through">
+                              {product.originalPrice}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
+                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                            <span>({product.rating.toFixed(1)})</span>
+                          </div>
+                        </div>
+
+                        {/* Bottom Action Row: Unit + Add to Cart */}
+                        <div className="flex items-center justify-between pt-2">
+                          <span className="text-xs text-gray-400 font-medium">
+                            {product.unit}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleAddToCart(product)}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer shadow-2xs ${
+                              isJustAdded
+                                ? 'bg-emerald-600 border-emerald-600 text-white'
+                                : 'border-emerald-500/30 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700'
+                            }`}
+                          >
+                            {isJustAdded ? (
+                              <>
+                                <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                                <span>Added</span>
+                              </>
+                            ) : (
+                              <>
+                                <ShoppingBag className="w-3.5 h-3.5" />
+                                <span>Add to Cart</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
+          </section>
+
+        </div>
+
+        {/* Floating Cart Toast notification */}
+        <AnimatePresence>
+          {addedItem && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="max-w-2xl w-full bg-white rounded-3xl p-6 sm:p-10 shadow-2xl relative"
-              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              className="fixed bottom-6 right-6 z-50 bg-gray-900 text-white rounded-2xl p-4 shadow-2xl border border-white/10 flex items-center gap-4 max-w-sm"
             >
+              <img
+                src={addedItem.image}
+                alt={addedItem.name}
+                onError={(e) => {
+                  e.currentTarget.src = addedItem.fallbackImage;
+                }}
+                className="w-12 h-12 object-contain rounded-xl bg-white/10 p-1 shrink-0"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-emerald-400">Added to Cart!</p>
+                <p className="text-sm font-bold truncate text-white">{addedItem.name}</p>
+                <p className="text-xs text-gray-300 font-mono">{addedItem.price}</p>
+              </div>
               <button
                 type="button"
-                onClick={() => setIsLightboxOpen(false)}
-                className="absolute top-5 right-5 text-stone-500 hover:text-stone-900 p-2 cursor-pointer"
-                aria-label="Close zoom"
+                onClick={openCart}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer shrink-0"
               >
-                <X size={20} />
+                View Cart
               </button>
-              <img
-                src={selectedProduct.image}
-                alt={selectedProduct.altText}
-                className="w-full max-h-[70vh] object-contain mx-auto"
-              />
-              <div className="text-center mt-4">
-                <h4 className="text-lg font-bold text-stone-900">{selectedProduct.name}</h4>
-                <p className="text-xs text-stone-500 mt-1">{selectedProduct.priceRange}</p>
-              </div>
             </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+
+      </div>
     </>
   );
 }
