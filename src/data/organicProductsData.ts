@@ -452,7 +452,7 @@ export const organicProductsList: OrganicProduct[] = [
 
 export const trustBarItems = [
   "CO2 Neutral Plastic Free Shipping",
-  "Free Delivery On Domestic Orders Over $99",
+  "Direct Mill-to-Port Containerized Export",
   "100% Premium Locally Sourced Organic Shop",
   "Support Small Local Business & Brands"
 ];

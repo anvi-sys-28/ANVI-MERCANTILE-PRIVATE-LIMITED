@@ -153,18 +153,23 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
               <NavLink
                 to="/products"
                 className={({ isActive }) =>
-                  `text-xs sm:text-sm font-medium tracking-wide transition-colors ${
+                  `relative inline-flex items-center gap-1.5 text-xs sm:text-sm tracking-wide transition-colors ${
                     isProductsPage
                       ? isActive
-                        ? 'text-stone-950 font-bold border-b-2 border-stone-950 pb-0.5'
-                        : 'text-stone-800 hover:text-black font-semibold'
+                        ? 'text-[#135E38] font-bold border-b-2 border-[#135E38] pb-0.5'
+                        : 'text-stone-800 hover:text-[#135E38] font-semibold'
                       : isActive
-                        ? 'text-white font-medium'
-                        : 'text-white/80 hover:text-white'
+                        ? 'text-emerald-400 font-bold border-b-2 border-emerald-400 pb-0.5'
+                        : 'text-emerald-400 hover:text-emerald-300 font-semibold'
                   }`
                 }
               >
-                Products
+                {/* Glowing beacon ping dot to highlight without a box */}
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400"></span>
+                </span>
+                <span>Products</span>
               </NavLink>
 
               <NavLink
@@ -337,9 +342,17 @@ export function Navbar({ isIntroActive = false }: NavbarProps) {
                           }`
                         }
                       >
-                        <span className="text-xl sm:text-2xl font-extrabold font-headline uppercase tracking-wide transition-colors">
-                          {item.label}
-                        </span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xl sm:text-2xl font-extrabold font-headline uppercase tracking-wide transition-colors">
+                            {item.label}
+                          </span>
+                          {item.label === 'Products' && (
+                            <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 shadow-xs">
+                              <span className="w-1.5 h-1.5 rounded-full bg-slate-950 animate-pulse" />
+                              Export Catalog
+                            </span>
+                          )}
+                        </div>
                         <span className="text-xs font-mono text-white/40 group-hover:text-sky-400 transition-colors">
                           {item.number}
                         </span>

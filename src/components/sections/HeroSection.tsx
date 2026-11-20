@@ -4,48 +4,49 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import InkBlotCarousel from '@/components/ui/ink-blot-carousel';
 import { QuickOrderBox } from '@/components/home/QuickOrderBox';
+import { MobileAppPhoneMockup } from '@/components/products/MobileAppPhoneMockup';
 
 const CAROUSEL_SLIDES = [
   {
     image: "/images/green_chilly.webp",
     title: "Fresh Premium Green Chilly",
-    caption: "Export Grade G4 / Jwala pungent green chillies direct from Maharashtra farms. Starting from $1.26/kg (MOQ 10 MT).",
+    caption: "Export Grade G4 / Jwala pungent green chillies direct from Maharashtra farms (MOQ 10 MT). Sortex cleaned & reefer packed.",
     alt: "Fresh Premium Green Chilly export",
   },
   {
     image: "/images/pomegranate.webp",
     title: "Fresh Ruby Pomegranates",
-    caption: "Bhagwa variety, Brix 16%+, export graded in 3.5kg / 5kg ventilated CFB cartons. Starting from $2.45/kg.",
+    caption: "Bhagwa variety, Brix 16%+, export graded in 3.5kg / 5kg ventilated CFB master cartons. GlobalGAP certified.",
     alt: "Fresh Pomegranates export",
   },
   {
     image: "/images/rice.webp",
     title: "Premium Indian Basmati Rice",
-    caption: "Traditional 1121 XXL Steam & Sella Basmati. Starting from $0.98/kg (MOQ 25 MT FCL).",
+    caption: "Traditional 1121 XXL Steam & Sella Basmati (MOQ 25 MT FCL). APEDA certified Sortex cleaned & aged.",
     alt: "Premium Indian Basmati Rice export",
   },
   {
     image: "/images/onion.webp",
     title: "Farm Fresh Nashik Red Onions",
-    caption: "Garwa / Summer crop fresh red onions (45mm - 55mm+). Starting from $0.48/kg in mesh bags.",
+    caption: "Garwa / Summer crop fresh red onions (45mm - 55mm+). High pungency export grade in ventilated mesh bags.",
     alt: "Fresh Onions export",
   },
   {
     image: "/images/makhana.webp",
     title: "Organic Popped Makhana",
-    caption: "Jumbo handpicked foxnuts (4 to 6+ sutta), naturally organic & gluten-free. Starting from $8.40/kg.",
+    caption: "Jumbo handpicked foxnuts (4 to 6+ sutta), naturally organic & gluten-free. Nitrogen-flushed food-grade packaging.",
     alt: "Organic Makhana export",
   },
   {
     image: "/images/guava.webp",
     title: "Fresh Pink Guavas",
-    caption: "Taiwan Pink / VNR variety, crisp texture and aromatic sweet pulp. Starting from $1.15/kg.",
+    caption: "Taiwan Pink / VNR variety, crisp texture and aromatic sweet pulp. Foam-netted export carton packed.",
     alt: "Fresh Guava export",
   },
   {
     image: "/images/grapes.webp",
     title: "Sweet Seedless Grapes",
-    caption: "Thompson Seedless export grade, Berry size 16mm-18mm+. Starting from $1.85/kg.",
+    caption: "Thompson Seedless export grade, Berry size 16mm-18mm+. Cold chain protected with sulphur pads.",
     alt: "Fresh Grapes export",
   },
 ];
@@ -169,20 +170,20 @@ export function HeroSection() {
                 </motion.div>
               </div>
 
-              {/* Right Column: ORDER BOX ON THE RIGHT SIDE */}
+              {/* Right Column: Mobile App Phone Mockup with centered "Mobile App Coming Soon" */}
               <motion.div
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="w-full lg:w-auto flex justify-center lg:justify-end shrink-0"
+                className="w-full lg:w-auto flex flex-col items-center justify-center shrink-0 z-20 pt-4 lg:pt-0"
               >
-                <QuickOrderBox position="right" />
+                <MobileAppPhoneMockup />
               </motion.div>
 
             </div>
           </motion.section>
         ) : (
-          /* STATE 2: PRODUCE CAROUSEL (After 10 seconds) - ORDER BOX SHIFTS TOWARDS THE LEFT SIDE */
+          /* STATE 2: PRODUCE CAROUSEL (After 10 seconds) - QUICK ORDER ON LEFT, MOBILE INTERFACE ON RIGHT */
           <motion.section
             key="carousel-hero"
             initial={{ opacity: 0, scale: 1.02 }}
@@ -201,14 +202,24 @@ export function HeroSection() {
               ink="#FFFFFF"
             />
 
-            {/* ORDER BOX ON THE LEFT SIDE */}
+            {/* QUICK ORDER ON THE LEFT SIDE */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="absolute z-30 top-20 sm:top-24 lg:top-28 left-4 sm:left-6 lg:left-12"
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="absolute z-30 top-16 sm:top-20 lg:top-24 left-4 sm:left-6 lg:left-12 flex flex-col items-start scale-[0.82] sm:scale-[0.88] lg:scale-95 origin-top-left"
             >
               <QuickOrderBox position="left" />
+            </motion.div>
+
+            {/* MOBILE INTERFACE ON THE RIGHT SIDE */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="hidden lg:flex flex-col items-center absolute z-30 top-16 sm:top-20 lg:top-22 right-4 sm:right-6 lg:right-12 scale-[0.82] xl:scale-[0.88] origin-top-right"
+            >
+              <MobileAppPhoneMockup />
             </motion.div>
           </motion.section>
         )}

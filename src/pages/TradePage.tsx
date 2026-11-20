@@ -288,11 +288,11 @@ export default function TradePage() {
                         {/* Price & Incoterms */}
                         <div className="pt-3 border-t border-[#0b3a40]/10 flex items-center justify-between">
                           <div>
-                            <span className="text-lg font-extrabold text-[#0b3a40]">
-                              ${prod.pricePerMtUsd.toLocaleString()}
+                            <span className="text-base font-extrabold text-[#0b3a40]">
+                              Custom Proforma
                             </span>
                             <span className="text-[10px] text-gray-500 block uppercase font-medium">
-                              Per Metric Ton (USD)
+                              FOB / CIF Pricing
                             </span>
                           </div>
                           <div className="text-right">
@@ -389,8 +389,8 @@ export default function TradePage() {
                     <h4 className="font-bold text-sm text-white uppercase font-headline">
                       {p.name}
                     </h4>
-                    <span className="text-[#c9a46b] font-extrabold text-base block mt-1">
-                      ${p.pricePerMtUsd.toLocaleString()} / MT
+                    <span className="text-[#c9a46b] font-extrabold text-sm block mt-1">
+                      Custom Proforma / MT
                     </span>
                   </div>
 

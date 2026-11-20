@@ -30,7 +30,6 @@ export function CartDrawer() {
   const { 
     items, 
     totalCount, 
-    totalEstimatedUsd, 
     isOpen, 
     closeCart, 
     removeItem, 
@@ -53,15 +52,6 @@ export function CartDrawer() {
   });
   const [orderGenerated, setOrderGenerated] = useState<{ orderNo: string; date: string } | null>(null);
 
-  // Format currency
-  const formatUsd = (val: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 2,
-    }).format(val);
-  };
-
   // WhatsApp checkout message generator
   const getWhatsAppOrderUrl = () => {
     let text = `*ANVI MERCANTILE — B2B REQUISITION ORDER*\n\n`;
@@ -74,13 +64,10 @@ export function CartDrawer() {
       text += `${idx + 1}. *${item.name}*\n`;
       text += `   - Variant/Pack: ${item.variantLabel}\n`;
       text += `   - Quantity: ${item.quantity}\n`;
-      text += `   - Price: ${item.priceDisplay}\n\n`;
+      text += `   - Allocation: ${item.priceDisplay || 'Official Export Allocation'}\n\n`;
     });
 
-    if (totalEstimatedUsd > 0) {
-      text += `*Estimated Subtotal:* ${formatUsd(totalEstimatedUsd)}\n\n`;
-    }
-
+    text += `*Terms:* FOB / CIF Discharge Port Allocation\n\n`;
     text += `Please issue the official proforma invoice and advise vessel schedule from JNPT Nhava Sheva.`;
 
     return `https://wa.me/918328246413?text=${encodeURIComponent(text)}`;
@@ -297,14 +284,12 @@ export function CartDrawer() {
               {/* Footer Checkout Actions */}
               {items.length > 0 && (
                 <div className="p-5 border-t border-[#E5DACD] bg-white space-y-3">
-                  {totalEstimatedUsd > 0 && (
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-[#7A746B] font-medium">Estimated Order Total:</span>
-                      <span className="text-base font-bold text-[#1F1E1B]">
-                        {formatUsd(totalEstimatedUsd)}
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-[#7A746B] font-medium">Pricing Terms:</span>
+                    <span className="font-bold text-[#135E38] bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                      Direct Mill Proforma Quote
+                    </span>
+                  </div>
 
                   {/* WhatsApp Direct Order Button */}
                   <a

@@ -91,7 +91,7 @@ export default function ProductDetailPage() {
     <>
       <SEO
         title={`${product.name} | Bulk Export from India (MOQ ${product.minOrderMt} MT)`}
-        description={`Import ${product.name} directly from verified Indian agricultural exporters. Starting at $${product.pricePerMtUsd}/MT with Incoterms ${product.incoterms.join('/')}.`}
+        description={`Import ${product.name} directly from verified Indian agricultural exporters with Incoterms ${product.incoterms.join('/')}. Request an official custom proforma quote.`}
       />
 
       <div className="bg-[#05080e] text-white pt-32 pb-24">
@@ -167,18 +167,18 @@ export default function ProductDetailPage() {
                 </p>
               </div>
 
-              {/* Pricing Box */}
+              {/* Export Allocation Box */}
               <div className="bg-[#0b3a40]/40 border border-[#0b3a40] p-6 rounded-2xl space-y-3">
                 <div className="flex items-baseline gap-3">
-                  <span className="text-3xl sm:text-4xl font-extrabold font-headline text-[#c9a46b]">
-                    ${product.pricePerMtUsd.toLocaleString()}
+                  <span className="text-2xl sm:text-3xl font-extrabold font-headline text-[#c9a46b]">
+                    Direct Mill Allocation
                   </span>
                   <span className="text-sm text-white/70 font-sans">
-                    / Metric Ton (USD)
+                    / Custom Proforma
                   </span>
                 </div>
                 <p className="text-xs text-white/60">
-                  Bulk trade benchmark pricing. Final CIF/CFR rate calculated upon port destination inquiry.
+                  Wholesale B2B export pricing. Official CIF/CFR rate calculated upon port destination inquiry with guaranteed APEDA certification.
                 </p>
               </div>
 

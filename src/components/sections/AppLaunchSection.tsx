@@ -200,7 +200,7 @@ export function AppLaunchSection({ className = '' }: { className?: string }) {
                     <div className="space-y-0.5 max-w-[60%]">
                       <div className="font-extrabold text-[10px] text-gray-900 leading-tight">Fresh &amp; Organic Fruits</div>
                       <div className="text-[8px] text-gray-500">100% Farm-to-Table Quality</div>
-                      <div className="font-bold text-[9px] text-gray-900 pt-0.5">$14.99 <span className="text-[7px] text-gray-400 font-normal">/Only</span></div>
+                      <div className="font-bold text-[9px] text-[#135E38] pt-0.5">B2B Proforma <span className="text-[7px] text-gray-500 font-normal">/ Direct Mill</span></div>
                     </div>
                     <div className="w-[38%] flex items-center justify-end">
                       <img

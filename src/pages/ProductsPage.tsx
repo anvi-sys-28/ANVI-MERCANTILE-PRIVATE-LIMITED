@@ -1,11 +1,12 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Heart, 
   ShoppingBag, 
   Star, 
   ArrowRight, 
-  Check 
+  Check,
+  ChevronDown 
 } from 'lucide-react';
 import { SEO } from '@/components/global/SEO';
 import { useCart } from '@/context/CartContext';
@@ -118,6 +119,34 @@ export default function ProductsPage() {
   const [addedItem, setAddedItem] = useState<StoreProduct | null>(null);
 
   const availableRef = useRef<HTMLDivElement>(null);
+  const [showScrollIndicator, setShowScrollIndicator] = useState<boolean>(true);
+
+  // Monitor scroll position so the indicator is visible until user reaches the Available Export Products section
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!availableRef.current) return;
+      const rect = availableRef.current.getBoundingClientRect();
+      // Once Available Export Products enters within 70% of the viewport, hide the indicator
+      if (rect.top <= window.innerHeight * 0.7) {
+        setShowScrollIndicator(false);
+      } else {
+        setShowScrollIndicator(true);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  const scrollToAvailableProducts = () => {
+    if (availableRef.current) {
+      availableRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   // Filter products for Section 4
   const filteredProducts = useMemo(() => {
@@ -534,6 +563,30 @@ export default function ProductsPage() {
           </section>
 
         </div>
+
+        {/* Floating Scroll Down Indicator (Visible on right side bottom until user reaches Available Export Products) */}
+        <AnimatePresence>
+          {showScrollIndicator && (
+            <motion.button
+              type="button"
+              onClick={scrollToAvailableProducts}
+              initial={{ opacity: 0, scale: 0.85, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.85, y: 15 }}
+              transition={{ duration: 0.25 }}
+              className="fixed bottom-20 lg:bottom-8 right-5 lg:right-8 z-40 bg-[#0B2C1B] hover:bg-[#135E38] text-white px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full shadow-xl hover:shadow-2xl border border-white/20 flex items-center gap-2 text-xs font-bold tracking-wide transition-all cursor-pointer group select-none"
+              aria-label="Scroll down to Available Export Products"
+            >
+              <span className="hidden sm:inline">Scroll Down</span>
+              <motion.div
+                animate={{ y: [0, 4, 0] }}
+                transition={{ repeat: Infinity, duration: 1.4, ease: 'easeInOut' }}
+              >
+                <ChevronDown className="w-4 h-4 text-emerald-400 group-hover:text-white transition-colors stroke-[2.5]" />
+              </motion.div>
+            </motion.button>
+          )}
+        </AnimatePresence>
 
         {/* Floating Cart Toast notification (No Prices) */}
         <AnimatePresence>
