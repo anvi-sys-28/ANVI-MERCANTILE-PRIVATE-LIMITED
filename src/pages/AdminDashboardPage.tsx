@@ -54,13 +54,17 @@ export default function AdminDashboardPage() {
   const [loginError, setLoginError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'mobile-users' | 'kpi' | 'kyc' | 'payments' | 'disputes'>('mobile-users');
+  const [activeTab, setActiveTab] = useState<'mobile-users' | 'mobile-orders' | 'kpi' | 'kyc' | 'payments' | 'disputes'>('mobile-users');
   const [kpiData, setKpiData] = useState<AdminKPIs | null>(null);
   const [pendingCompanies, setPendingCompanies] = useState<any[]>([]);
   const [pendingPayments, setPendingPayments] = useState<any[]>([]);
   const [disputesQueue, setDisputesQueue] = useState<any[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+
+  // Live Orders State (from Mobile App Checkouts & Bookings)
+  const [liveOrders, setLiveOrders] = useState<any[]>([]);
+  const [isSyncingOrders, setIsSyncingOrders] = useState(false);
 
   // Mobile App Users & Monitoring State (Admin-Provisioned Accounts - 100% Real-Time Live)
   const [mobileUsers, setMobileUsers] = useState<any[]>([]);
@@ -118,9 +122,50 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Check existing token and sync live mobile users on mount
+  const loadOrdersData = async () => {
+    setIsSyncingOrders(true);
+    try {
+      const ordRes = await fetch(`${apiBase}/orders`);
+      if (ordRes.ok) {
+        const ordJson = await ordRes.json();
+        setLiveOrders(ordJson.data || []);
+      }
+    } catch (e) {
+      console.warn('Backend orders fetch error:', e);
+    } finally {
+      setIsSyncingOrders(false);
+    }
+  };
+
+  const handleUpdateOrderStatus = async (orderId: string, status: string) => {
+    try {
+      await fetch(`${apiBase}/orders/${orderId}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      loadOrdersData();
+      setActionMessage(`Order "${orderId}" marked as ${status}.`);
+    } catch (e) {
+      console.warn('Failed to update order status:', e);
+    }
+  };
+
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!window.confirm(`Delete order "${orderId}" from database?`)) return;
+    try {
+      await fetch(`${apiBase}/orders/${orderId}`, { method: 'DELETE' });
+      loadOrdersData();
+      setActionMessage(`Order "${orderId}" removed.`);
+    } catch (e) {
+      console.warn('Failed to delete order:', e);
+    }
+  };
+
+  // Check existing token and sync live mobile users and orders on mount
   useEffect(() => {
     loadMobileData();
+    loadOrdersData();
     const token = localStorage.getItem('access_token');
     if (token) {
       fetchMe(token);
@@ -237,6 +282,7 @@ export default function AdminDashboardPage() {
 
       // 5. Mobile App Users & Stats (Live sync from Railway backend)
       loadMobileData();
+      loadOrdersData();
     } catch (err) {
       console.error('Failed to load admin data', err);
     } finally {
@@ -665,8 +711,9 @@ export default function AdminDashboardPage() {
           {/* Navigation Tabs */}
           <div className="flex border-b border-[#0b3a40]/15 gap-4 overflow-x-auto pb-2">
             {[
-              { id: 'mobile-users', label: `Mobile App Accounts (${mobileUsers.length})`, icon: Smartphone },
-              { id: 'kpi', label: 'Operations & Exports', icon: Package },
+              { id: 'mobile-users', label: `Mobile Accounts (${mobileUsers.length})`, icon: Smartphone },
+              { id: 'mobile-orders', label: `Mobile Orders (${liveOrders.length})`, icon: Package },
+              { id: 'kpi', label: 'Operations & Exports', icon: TrendingUp },
               { id: 'kyc', label: `KYC Verifications (${pendingCompanies.length})`, icon: Users },
               { id: 'payments', label: `Wire Approvals (${pendingPayments.length})`, icon: CreditCard },
               { id: 'disputes', label: `Disputes (${disputesQueue.length})`, icon: AlertCircle },
@@ -1294,6 +1341,236 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
+            </div>
+          )}
+
+          {/* TAB: Mobile App Live Orders & RFQ Management */}
+          {activeTab === 'mobile-orders' && (
+            <div className="space-y-6">
+              {/* Header Box */}
+              <div className="bg-white rounded-2xl border border-[#0b3a40]/10 p-6 sm:p-8 shadow-sm">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-gray-100">
+                  <div className="space-y-1">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold uppercase tracking-wider font-headline">
+                      <Package className="w-3 h-3" />
+                      Live PostgreSQL Database Stream
+                    </div>
+                    <h3 className="text-lg font-bold font-headline uppercase text-[#0b3a40]">
+                      Mobile App Orders &amp; RFQs ({liveOrders.length})
+                    </h3>
+                    <p className="text-xs text-gray-500 max-w-2xl">
+                      Real-time orders placed by provisioned buyers and registered farmers from the mobile application. Review commodity specifications, shipping allocations, advance payments, and issue export proformas.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => loadOrdersData()}
+                      disabled={isSyncingOrders}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0b3a40] hover:bg-[#134e4a] text-[#c9a46b] text-xs font-bold font-headline uppercase transition-colors cursor-pointer disabled:opacity-50"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${isSyncingOrders ? 'animate-spin' : ''}`} />
+                      <span>{isSyncingOrders ? 'Syncing...' : 'Sync Orders'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* KPI Metrics Strip */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6">
+                  <div className="p-4 rounded-xl bg-gray-50 border border-gray-200">
+                    <div className="text-[10px] font-bold uppercase text-gray-500 tracking-wider">Total Orders</div>
+                    <div className="text-2xl font-black text-[#0b3a40] mt-1">{liveOrders.length}</div>
+                    <div className="text-[10px] text-gray-400 mt-0.5">Mobile app checkouts</div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
+                    <div className="text-[10px] font-bold uppercase text-amber-700 tracking-wider">Pending Review</div>
+                    <div className="text-2xl font-black text-amber-800 mt-1">
+                      {liveOrders.filter((o) => o.status === 'PENDING_REVIEW').length}
+                    </div>
+                    <div className="text-[10px] text-amber-600 mt-0.5">Awaiting proforma</div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-blue-50 border border-blue-200">
+                    <div className="text-[10px] font-bold uppercase text-blue-700 tracking-wider">Proformas Issued</div>
+                    <div className="text-2xl font-black text-blue-800 mt-1">
+                      {liveOrders.filter((o) => o.status === 'PROFORMA_ISSUED').length}
+                    </div>
+                    <div className="text-[10px] text-blue-600 mt-0.5">Quote sent to client</div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200">
+                    <div className="text-[10px] font-bold uppercase text-emerald-700 tracking-wider">Confirmed / Dispatched</div>
+                    <div className="text-2xl font-black text-emerald-800 mt-1">
+                      {liveOrders.filter((o) => o.status === 'CONFIRMED' || o.status === 'DISPATCHED').length}
+                    </div>
+                    <div className="text-[10px] text-emerald-600 mt-0.5">Container allocated</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Orders Table Card */}
+              <div className="bg-white rounded-2xl border border-[#0b3a40]/10 overflow-hidden shadow-sm">
+                <div className="p-5 sm:p-6 border-b border-gray-100 flex items-center justify-between">
+                  <h4 className="text-sm font-bold font-headline uppercase text-[#0b3a40]">
+                    Recent Order Transactions
+                  </h4>
+                  <span className="text-xs text-gray-400">
+                    Showing {liveOrders.length} records from Railway PostgreSQL
+                  </span>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-gray-50 border-b border-gray-200 text-gray-500 font-headline uppercase text-[10px] tracking-wider">
+                        <th className="py-3 px-4">Order ID &amp; Time</th>
+                        <th className="py-3 px-4">Buyer Entity &amp; Contact</th>
+                        <th className="py-3 px-4">Commodity / Items</th>
+                        <th className="py-3 px-4">Discharge Port &amp; Container</th>
+                        <th className="py-3 px-4">Total &amp; Payment</th>
+                        <th className="py-3 px-4">Status</th>
+                        <th className="py-3 px-4 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {liveOrders.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="py-16 text-center">
+                            <div className="flex flex-col items-center justify-center gap-2">
+                              <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                                <Package className="w-6 h-6" />
+                              </div>
+                              <div className="font-bold text-gray-700 text-sm">
+                                No mobile orders recorded yet
+                              </div>
+                              <p className="text-xs text-gray-400 max-w-sm">
+                                Log in to the mobile app with an account you provisioned, add commodities to cart, and swipe to checkout. The complete order will appear here in real time.
+                              </p>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : (
+                        liveOrders.map((order) => {
+                          const itemsList = order.items && Array.isArray(order.items) && order.items.length > 0
+                            ? order.items
+                            : null;
+                          return (
+                            <tr key={order.id || order.orderId} className="hover:bg-gray-50/80 transition-colors">
+                              <td className="py-3.5 px-4">
+                                <div className="font-mono text-xs font-bold text-[#0b3a40] bg-gray-100 px-2 py-0.5 rounded w-fit border border-gray-200">
+                                  {order.orderId || order.id}
+                                </div>
+                                <div className="text-[10px] text-gray-400 mt-1">
+                                  {order.createdAt ? new Date(order.createdAt).toLocaleString() : 'Just now'}
+                                </div>
+                              </td>
+
+                              <td className="py-3.5 px-4">
+                                <div className="font-bold text-gray-900 text-sm">{order.companyName || 'Export Buyer'}</div>
+                                <div className="text-gray-600 text-xs mt-0.5">{order.contactName}</div>
+                                <div className="text-gray-400 text-[10px] font-mono">{order.contactPhone || order.contactEmail}</div>
+                              </td>
+
+                              <td className="py-3.5 px-4">
+                                {itemsList ? (
+                                  <div className="space-y-1">
+                                    {itemsList.map((item: any, idx: number) => (
+                                      <div key={idx} className="flex items-center gap-1.5 text-xs text-gray-800">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
+                                        <span className="font-semibold">{item.name}</span>
+                                        <span className="text-gray-400 text-[10px]">({item.quantity || 1} lot · {item.moq || '20 MT'})</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div>
+                                    <div className="font-semibold text-gray-800">{order.commodityName || 'Standard Commodity Lot'}</div>
+                                    <div className="text-gray-500 text-[10px]">{order.volume || '25 MT'}</div>
+                                  </div>
+                                )}
+                              </td>
+
+                              <td className="py-3.5 px-4">
+                                <div className="font-medium text-gray-800 flex items-center gap-1 text-xs">
+                                  <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                  <span>{order.destinationPort || 'Jebel Ali Port (Dubai)'}</span>
+                                </div>
+                                <div className="font-mono text-[10px] text-gray-500 mt-1">
+                                  Box: {order.assignedContainer || 'AM-8840'}
+                                </div>
+                              </td>
+
+                              <td className="py-3.5 px-4">
+                                <div className="font-bold text-emerald-700 text-sm">
+                                  ${typeof order.totalAmount === 'number' ? order.totalAmount.toFixed(2) : order.totalAmount || '101.00'}
+                                </div>
+                                <div className="text-[10px] text-gray-500 mt-0.5">
+                                  {order.paymentMethod || 'Advance Wire (BCA)'}
+                                </div>
+                              </td>
+
+                              <td className="py-3.5 px-4">
+                                <span
+                                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                                    order.status === 'CONFIRMED' || order.status === 'DISPATCHED'
+                                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                      : order.status === 'PROFORMA_ISSUED'
+                                      ? 'bg-blue-100 text-blue-800 border border-blue-300'
+                                      : 'bg-amber-100 text-amber-800 border border-amber-300'
+                                  }`}
+                                >
+                                  <span
+                                    className={`w-1.5 h-1.5 rounded-full ${
+                                      order.status === 'CONFIRMED' || order.status === 'DISPATCHED'
+                                        ? 'bg-emerald-600'
+                                        : order.status === 'PROFORMA_ISSUED'
+                                        ? 'bg-blue-600'
+                                        : 'bg-amber-600'
+                                    }`}
+                                  />
+                                  {order.status || 'PENDING_REVIEW'}
+                                </span>
+                              </td>
+
+                              <td className="py-3.5 px-4 text-right">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  {order.status === 'PENDING_REVIEW' && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleUpdateOrderStatus(order.id || order.orderId, 'PROFORMA_ISSUED')}
+                                      className="px-2.5 py-1 rounded bg-[#0b3a40] hover:bg-[#134e4a] text-[#c9a46b] text-[10px] font-bold transition-colors cursor-pointer"
+                                      title="Issue Official Export Proforma to Buyer"
+                                    >
+                                      Issue Proforma
+                                    </button>
+                                  )}
+                                  {order.status === 'PROFORMA_ISSUED' && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleUpdateOrderStatus(order.id || order.orderId, 'CONFIRMED')}
+                                      className="px-2.5 py-1 rounded bg-emerald-700 hover:bg-emerald-800 text-white text-[10px] font-bold transition-colors cursor-pointer"
+                                      title="Confirm Booking &amp; Allocate Container"
+                                    >
+                                      Confirm Order
+                                    </button>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteOrder(order.id || order.orderId)}
+                                    className="p-1.5 rounded-lg bg-gray-100 hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors cursor-pointer"
+                                    title="Delete Order"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           )}
 
