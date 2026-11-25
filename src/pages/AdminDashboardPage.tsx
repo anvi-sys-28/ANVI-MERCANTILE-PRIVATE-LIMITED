@@ -62,51 +62,8 @@ export default function AdminDashboardPage() {
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
-  // Mobile App Users & Monitoring State (Admin-Provisioned Accounts)
-  const [mobileUsers, setMobileUsers] = useState<any[]>([
-    {
-      id: 'usr_01',
-      userId: 'ANVI-AE-8840',
-      password: 'AnviDubai2026!',
-      companyName: 'Gulf Harvest Trading LLC',
-      contactName: 'Tariq Al-Mansoor',
-      email: 'tariq@gulfharvest.ae',
-      phone: '+971 50 884 1029',
-      destinationPort: 'Jebel Ali Port (Dubai, UAE)',
-      status: 'ACTIVE',
-      assignedContainer: 'AM-8840',
-      createdAt: new Date().toISOString(),
-      lastLoginAt: '10 mins ago'
-    },
-    {
-      id: 'usr_02',
-      userId: 'ANVI-NL-4012',
-      password: 'RotterdamAgri#1',
-      companyName: 'EuroSpice Logistics B.V.',
-      contactName: 'Hans Van Der Meer',
-      email: 'hans@eurospice.nl',
-      phone: '+31 10 772 4910',
-      destinationPort: 'Rotterdam Port (Netherlands)',
-      status: 'ACTIVE',
-      assignedContainer: 'AM-7721',
-      createdAt: new Date().toISOString(),
-      lastLoginAt: '2 hours ago'
-    },
-    {
-      id: 'usr_03',
-      userId: 'partner@anvimercantile.com',
-      password: 'ExportPartner2026!',
-      companyName: 'Anvi Export Desk Partner',
-      contactName: 'Export Desk Manager',
-      email: 'partner@anvimercantile.com',
-      phone: '+91 83282 46413',
-      destinationPort: 'Jebel Ali Port (Dubai, UAE)',
-      status: 'ACTIVE',
-      assignedContainer: 'AM-8840',
-      createdAt: new Date().toISOString(),
-      lastLoginAt: 'Just now'
-    }
-  ]);
+  // Mobile App Users & Monitoring State (Admin-Provisioned Accounts - 100% Real-Time Live)
+  const [mobileUsers, setMobileUsers] = useState<any[]>([]);
   const [mobileStats, setMobileStats] = useState<any>(null);
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [roleFilter, setRoleFilter] = useState<'all' | 'buyer' | 'farmer'>('all');
@@ -138,10 +95,32 @@ export default function AdminDashboardPage() {
     assignedContainer: 'AM-8840',
   });
 
+  const [isSyncingMobile, setIsSyncingMobile] = useState(false);
   const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000/api/v1';
 
-  // Check existing token on mount
+  const loadMobileData = async () => {
+    setIsSyncingMobile(true);
+    try {
+      const mobRes = await fetch(`${apiBase}/admin/mobile-users`);
+      if (mobRes.ok) {
+        const mobJson = await mobRes.json();
+        setMobileUsers(mobJson.data || []);
+      }
+      const mobStatsRes = await fetch(`${apiBase}/admin/mobile-stats`);
+      if (mobStatsRes.ok) {
+        const statsJson = await mobStatsRes.json();
+        setMobileStats(statsJson.data);
+      }
+    } catch (e) {
+      console.warn('Backend mobile fetch error:', e);
+    } finally {
+      setIsSyncingMobile(false);
+    }
+  };
+
+  // Check existing token and sync live mobile users on mount
   useEffect(() => {
+    loadMobileData();
     const token = localStorage.getItem('access_token');
     if (token) {
       fetchMe(token);
@@ -256,23 +235,8 @@ export default function AdminDashboardPage() {
         setDisputesQueue(dispJson.data || []);
       }
 
-      // 5. Mobile App Users & Stats (from Railway backend)
-      try {
-        const mobRes = await fetch(`${apiBase}/admin/mobile-users`);
-        if (mobRes.ok) {
-          const mobJson = await mobRes.json();
-          if (mobJson.data && mobJson.data.length > 0) {
-            setMobileUsers(mobJson.data);
-          }
-        }
-        const mobStatsRes = await fetch(`${apiBase}/admin/mobile-stats`);
-        if (mobStatsRes.ok) {
-          const statsJson = await mobStatsRes.json();
-          setMobileStats(statsJson.data);
-        }
-      } catch (e) {
-        console.warn('Backend mobile fetch offline, keeping local state', e);
-      }
+      // 5. Mobile App Users & Stats (Live sync from Railway backend)
+      loadMobileData();
     } catch (err) {
       console.error('Failed to load admin data', err);
     } finally {
@@ -314,9 +278,10 @@ export default function AdminDashboardPage() {
 
       if (res.ok) {
         const body = await res.json();
-        setMobileUsers((prev) => [body.data, ...prev]);
+        setMobileUsers((prev) => [body.data, ...prev.filter((u) => u.id !== body.data.id && u.userId !== body.data.userId)]);
         setLastCreatedUser(body.data);
         setActionMessage(`${newUserForm.role.toUpperCase()} Account for "${newUserForm.companyName}" (${newUserForm.userId}) provisioned successfully.`);
+        loadMobileData();
       } else {
         const errJson = await res.json().catch(() => null);
         const localUser = {
@@ -385,7 +350,8 @@ export default function AdminDashboardPage() {
     } catch {}
 
     setMobileUsers((prev) => prev.filter((u) => u.id !== id && u.userId !== id));
-    setActionMessage('User account removed.');
+    loadMobileData();
+    setActionMessage('User account removed from database.');
   };
 
   const handleCopyCredentials = (user: any) => {
@@ -1093,36 +1059,50 @@ export default function AdminDashboardPage() {
                     <p className="text-xs text-gray-500">Live monitoring of authorized buyers &amp; registered farmers</p>
                   </div>
 
-                  {/* Role Filter Tabs */}
-                  <div className="flex items-center gap-1.5 p-1 bg-gray-100 rounded-xl">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* Role Filter Tabs */}
+                    <div className="flex items-center gap-1.5 p-1 bg-gray-100 rounded-xl">
+                      <button
+                        type="button"
+                        onClick={() => setRoleFilter('all')}
+                        className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
+                          roleFilter === 'all' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                      >
+                        All ({mobileUsers.length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRoleFilter('buyer')}
+                        className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1 ${
+                          roleFilter === 'buyer' ? 'bg-[#0b3a40] text-[#c9a46b] shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                      >
+                        <span>🛒</span>
+                        <span>Buyers ({mobileUsers.filter((u) => u.role !== 'farmer').length})</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRoleFilter('farmer')}
+                        className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1 ${
+                          roleFilter === 'farmer' ? 'bg-emerald-800 text-amber-200 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                      >
+                        <span>🌾</span>
+                        <span>Farmers ({mobileUsers.filter((u) => u.role === 'farmer').length})</span>
+                      </button>
+                    </div>
+
+                    {/* Sync Live Database Button */}
                     <button
                       type="button"
-                      onClick={() => setRoleFilter('all')}
-                      className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
-                        roleFilter === 'all' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                      }`}
+                      onClick={() => loadMobileData()}
+                      disabled={isSyncingMobile}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#0b3a40] text-xs font-bold rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+                      title="Sync live records from Railway Database"
                     >
-                      All ({mobileUsers.length})
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setRoleFilter('buyer')}
-                      className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1 ${
-                        roleFilter === 'buyer' ? 'bg-[#0b3a40] text-[#c9a46b] shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                    >
-                      <span>🛒</span>
-                      <span>Buyers ({mobileUsers.filter((u) => u.role !== 'farmer').length})</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setRoleFilter('farmer')}
-                      className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1 ${
-                        roleFilter === 'farmer' ? 'bg-emerald-800 text-amber-200 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                    >
-                      <span>🌾</span>
-                      <span>Farmers ({mobileUsers.filter((u) => u.role === 'farmer').length})</span>
+                      <RefreshCw className={`w-3.5 h-3.5 ${isSyncingMobile ? 'animate-spin text-[#c9a46b]' : ''}`} />
+                      <span>{isSyncingMobile ? 'Syncing...' : 'Sync DB'}</span>
                     </button>
                   </div>
 
@@ -1148,9 +1128,32 @@ export default function AdminDashboardPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {mobileUsers
-                        .filter((u) => roleFilter === 'all' || (roleFilter === 'farmer' ? u.role === 'farmer' : u.role !== 'farmer'))
-                        .map((user) => {
+                      {(() => {
+                        const filtered = mobileUsers.filter(
+                          (u) => roleFilter === 'all' || (roleFilter === 'farmer' ? u.role === 'farmer' : u.role !== 'farmer')
+                        );
+                        if (filtered.length === 0) {
+                          return (
+                            <tr>
+                              <td colSpan={8} className="py-12 text-center">
+                                <div className="flex flex-col items-center justify-center gap-2">
+                                  <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                                    <Users className="w-6 h-6" />
+                                  </div>
+                                  <div className="font-bold text-gray-700 text-sm">
+                                    {roleFilter === 'all'
+                                      ? 'No provisioned accounts in database'
+                                      : `No ${roleFilter} accounts found`}
+                                  </div>
+                                  <p className="text-xs text-gray-400 max-w-sm">
+                                    Your live Railway database is connected. Click &quot;Provision Mobile Account&quot; above to create a real-time Buyer or Farmer credential.
+                                  </p>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        }
+                        return filtered.map((user) => {
                           const isPassVisible = showPasswordMap[user.id];
                           const isFarmer = user.role === 'farmer';
                           return (
@@ -1251,7 +1254,8 @@ export default function AdminDashboardPage() {
                               </td>
                             </tr>
                           );
-                        })}
+                        });
+                      })()}
                     </tbody>
                   </table>
                 </div>
