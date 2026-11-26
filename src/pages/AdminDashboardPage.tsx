@@ -23,6 +23,9 @@ import {
   Eye,
   EyeOff,
   MapPin,
+  MessageSquare,
+  QrCode,
+  Send,
 } from 'lucide-react';
 
 interface AdminKPIs {
@@ -54,13 +57,23 @@ export default function AdminDashboardPage() {
   const [loginError, setLoginError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'mobile-users' | 'mobile-orders' | 'kpi' | 'kyc' | 'payments' | 'disputes'>('mobile-users');
+  const [activeTab, setActiveTab] = useState<'mobile-users' | 'mobile-orders' | 'whatsapp' | 'kpi' | 'kyc' | 'payments' | 'disputes'>('mobile-users');
   const [kpiData, setKpiData] = useState<AdminKPIs | null>(null);
   const [pendingCompanies, setPendingCompanies] = useState<any[]>([]);
   const [pendingPayments, setPendingPayments] = useState<any[]>([]);
   const [disputesQueue, setDisputesQueue] = useState<any[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+
+  // WhatsApp Multi-Device Automation State
+  const [waStatus, setWaStatus] = useState<'DISCONNECTED' | 'CONNECTING' | 'SCAN_QR' | 'CONNECTED'>('DISCONNECTED');
+  const [waQrCode, setWaQrCode] = useState<string | null>(null);
+  const [waConnectedNumber, setWaConnectedNumber] = useState<string | null>(null);
+  const [waRecipientPhone, setWaRecipientPhone] = useState('8328246413');
+  const [waChannel, setWaChannel] = useState<'whatsapp' | 'telegram' | 'both'>('whatsapp');
+  const [isGeneratingQr, setIsGeneratingQr] = useState(false);
+  const [isSendingTest, setIsSendingTest] = useState(false);
+  const [waFeedback, setWaFeedback] = useState<string | null>(null);
 
   // Live Orders State (from Mobile App Checkouts & Bookings)
   const [liveOrders, setLiveOrders] = useState<any[]>([]);
@@ -100,7 +113,113 @@ export default function AdminDashboardPage() {
   });
 
   const [isSyncingMobile, setIsSyncingMobile] = useState(false);
-  const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000/api/v1';
+  const apiBase = import.meta.env.VITE_API_URL || 'https://anvimerbackend-production-5218beeb.up.railway.app/api/v1';
+
+  // WhatsApp auto-poll
+  const checkWaStatus = async () => {
+    try {
+      const res = await fetch(`${apiBase}/whatsapp/status`);
+      if (res.ok) {
+        const json = await res.json();
+        setWaStatus(json.status || 'DISCONNECTED');
+        if (json.qrCode) setWaQrCode(json.qrCode);
+        if (json.connectedNumber) setWaConnectedNumber(json.connectedNumber);
+      }
+    } catch (e) {
+      console.warn('WhatsApp status check error:', e);
+    }
+  };
+
+  useEffect(() => {
+    checkWaStatus();
+  }, []);
+
+  useEffect(() => {
+    let interval: any;
+    if (waStatus === 'SCAN_QR' || waStatus === 'CONNECTING') {
+      interval = setInterval(checkWaStatus, 3000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [waStatus]);
+
+  const handleGenerateQr = async () => {
+    setIsGeneratingQr(true);
+    setWaFeedback(null);
+    try {
+      const res = await fetch(`${apiBase}/whatsapp/qr`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantId: 'default' }),
+      });
+      const data = await res.json();
+      if (data.qrCode) {
+        setWaQrCode(data.qrCode);
+        setWaStatus('SCAN_QR');
+      } else if (data.status === 'CONNECTED') {
+        setWaStatus('CONNECTED');
+        setWaConnectedNumber(data.connectedNumber || null);
+        setWaFeedback('Device already linked and active!');
+      }
+    } catch (err: any) {
+      setWaFeedback('Failed to generate WhatsApp QR code.');
+    } finally {
+      setIsGeneratingQr(false);
+    }
+  };
+
+  const handleDisconnectWa = async () => {
+    try {
+      await fetch(`${apiBase}/whatsapp/disconnect`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantId: 'default' }),
+      });
+      setWaStatus('DISCONNECTED');
+      setWaQrCode(null);
+      setWaConnectedNumber(null);
+      setWaFeedback('WhatsApp device unlinked successfully.');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSendTestShift = async (shift: number) => {
+    setIsSendingTest(true);
+    setWaFeedback(null);
+    try {
+      const res = await fetch(`${apiBase}/whatsapp/test`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shift, phone: waRecipientPhone, tenantId: 'default' }),
+      });
+      const json = await res.json();
+      setWaFeedback(json.message || `Shift ${shift} PDF report dispatched to +91 ${waRecipientPhone}`);
+    } catch (err: any) {
+      setWaFeedback('Failed to dispatch test shift report.');
+    } finally {
+      setIsSendingTest(false);
+    }
+  };
+
+  const handleSendOrderAlertTest = async () => {
+    setIsSendingTest(true);
+    setWaFeedback(null);
+    try {
+      const res = await fetch(`${apiBase}/whatsapp/send-order-test`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: waRecipientPhone, tenantId: 'default' }),
+      });
+      const json = await res.json();
+      setWaFeedback(json.message || `Test order alert dispatched to +91 ${waRecipientPhone}`);
+    } catch (err: any) {
+      setWaFeedback('Failed to dispatch test order alert.');
+    } finally {
+      setIsSendingTest(false);
+    }
+  };
 
   const loadMobileData = async () => {
     setIsSyncingMobile(true);
@@ -713,6 +832,7 @@ export default function AdminDashboardPage() {
             {[
               { id: 'mobile-users', label: `Mobile Accounts (${mobileUsers.length})`, icon: Smartphone },
               { id: 'mobile-orders', label: `Mobile Orders (${liveOrders.length})`, icon: Package },
+              { id: 'whatsapp', label: 'WhatsApp Automation', icon: MessageSquare },
               { id: 'kpi', label: 'Operations & Exports', icon: TrendingUp },
               { id: 'kyc', label: `KYC Verifications (${pendingCompanies.length})`, icon: Users },
               { id: 'payments', label: `Wire Approvals (${pendingPayments.length})`, icon: CreditCard },
@@ -1341,6 +1461,259 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
+            </div>
+          )}
+
+          {/* TAB: WhatsApp Multi-Device Automation Desk */}
+          {activeTab === 'whatsapp' && (
+            <div className="space-y-6">
+              {/* Header Card */}
+              <div className="bg-white rounded-2xl border border-[#0b3a40]/10 p-6 sm:p-8 shadow-sm">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-gray-100">
+                  <div className="space-y-1">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold uppercase tracking-wider font-headline">
+                      <MessageSquare className="w-3 h-3" />
+                      Free Open-Source WhatsApp Multi-Device Gateway
+                    </div>
+                    <h3 className="text-xl font-bold font-headline uppercase text-[#0b3a40]">
+                      WhatsApp Automated Notifications &amp; Shift Reports
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      Powered by <code className="text-[#0b3a40] font-mono font-bold">@whiskeysockets/baileys</code> — Zero Meta API fees, no template restrictions, direct WebSocket session.
+                    </p>
+                  </div>
+
+                  {/* Channel Selection Toggle */}
+                  <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-xl">
+                    <button
+                      onClick={() => setWaChannel('whatsapp')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                        waChannel === 'whatsapp' ? 'bg-[#0b3a40] text-white shadow' : 'text-gray-600 hover:text-black'
+                      }`}
+                    >
+                      WhatsApp Web
+                    </button>
+                    <button
+                      onClick={() => setWaChannel('telegram')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                        waChannel === 'telegram' ? 'bg-[#0b3a40] text-white shadow' : 'text-gray-600 hover:text-black'
+                      }`}
+                    >
+                      Telegram Bot
+                    </button>
+                    <button
+                      onClick={() => setWaChannel('both')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                        waChannel === 'both' ? 'bg-[#0b3a40] text-white shadow' : 'text-gray-600 hover:text-black'
+                      }`}
+                    >
+                      Both Channels
+                    </button>
+                  </div>
+                </div>
+
+                {/* Feedback Banner */}
+                {waFeedback && (
+                  <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between text-xs text-emerald-800 font-semibold">
+                    <span>{waFeedback}</span>
+                    <button onClick={() => setWaFeedback(null)} className="text-emerald-600 hover:text-emerald-900 font-bold ml-4">✕</button>
+                  </div>
+                )}
+
+                {/* Grid Layout: Left Pairing Controls | Right QR Display */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6">
+                  {/* Left Column: Pairing & Status Controls (7 Cols) */}
+                  <div className="lg:col-span-7 space-y-5">
+                    {/* Status Pill Card */}
+                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 flex items-center justify-between">
+                      <div>
+                        <span className="text-[11px] font-bold text-gray-500 uppercase font-headline">Gateway Connection Status</span>
+                        <div className="flex items-center gap-2 mt-1">
+                          {waStatus === 'CONNECTED' && (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
+                              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                              Connected (+{waConnectedNumber || 'Linked'})
+                            </span>
+                          )}
+                          {waStatus === 'SCAN_QR' && (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold">
+                              <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                              Scan QR Code on Phone
+                            </span>
+                          )}
+                          {waStatus === 'CONNECTING' && (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-bold">
+                              <RefreshCw className="w-3 h-3 animate-spin" />
+                              Connecting Socket...
+                            </span>
+                          )}
+                          {waStatus === 'DISCONNECTED' && (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-200 text-gray-700 text-xs font-bold">
+                              Not Linked
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2">
+                        {waStatus !== 'CONNECTED' ? (
+                          <button
+                            onClick={handleGenerateQr}
+                            disabled={isGeneratingQr}
+                            className="flex items-center gap-2 px-4 py-2 bg-[#0b3a40] text-[#c9a46b] hover:bg-[#08292d] text-xs font-bold uppercase rounded-xl transition-all shadow disabled:opacity-50"
+                          >
+                            {isGeneratingQr ? <RefreshCw className="w-4 h-4 animate-spin" /> : <QrCode className="w-4 h-4" />}
+                            {isGeneratingQr ? 'Emitting QR...' : 'Generate QR Code'}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={handleDisconnectWa}
+                            className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 hover:bg-red-200 text-xs font-bold uppercase rounded-xl transition-all"
+                          >
+                            Unlink Device
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Step-by-Step Instructions */}
+                    <div className="bg-white rounded-xl p-4 border border-gray-200 space-y-2">
+                      <h4 className="text-xs font-bold uppercase text-gray-700 font-headline">How to Link WhatsApp Multi-Device:</h4>
+                      <ol className="text-xs text-gray-600 space-y-1.5 list-decimal list-inside">
+                        <li>Open <strong className="text-gray-900">WhatsApp</strong> on your phone (Operations / Admin phone).</li>
+                        <li>Tap <strong className="text-gray-900">Settings</strong> (iOS) or <strong className="text-gray-900">Three Dots Menu</strong> (Android) &rarr; <strong className="text-[#0b3a40]">Linked Devices</strong>.</li>
+                        <li>Tap <strong className="text-emerald-700">Link a Device</strong> and point your camera at the QR code on the right.</li>
+                      </ol>
+                      <p className="text-[11px] text-gray-400 italic pt-1">
+                        Session credentials are encrypted locally on the backend. No passwords or tokens are transmitted to external cloud APIs.
+                      </p>
+                    </div>
+
+                    {/* Target Recipient Number */}
+                    <div className="bg-white rounded-xl p-4 border border-gray-200 space-y-2">
+                      <label className="block text-xs font-bold uppercase text-gray-700 font-headline">
+                        Owner / Dispatcher Recipient Number:
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <span className="px-3 py-2 bg-gray-100 rounded-lg text-xs font-bold text-gray-600 border border-gray-300">+91</span>
+                        <input
+                          type="text"
+                          value={waRecipientPhone}
+                          onChange={(e) => setWaRecipientPhone(e.target.value)}
+                          placeholder="8328246413"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-xs font-bold focus:outline-none focus:border-[#0b3a40]"
+                        />
+                      </div>
+                      <span className="text-[10px] text-gray-400">
+                        Default configured for Anvi Operations Desk: <strong className="text-gray-700">+91 8328246413</strong>.
+                      </span>
+                    </div>
+
+                    {/* Instant Testing Buttons */}
+                    <div className="bg-white rounded-xl p-4 border border-gray-200 space-y-3">
+                      <h4 className="text-xs font-bold uppercase text-gray-700 font-headline">Instant Verification &amp; Test Dispatches:</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <button
+                          onClick={handleSendOrderAlertTest}
+                          disabled={isSendingTest}
+                          className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[11px] font-bold uppercase transition-all disabled:opacity-50"
+                        >
+                          <Send className="w-3.5 h-3.5" />
+                          Test Order Alert
+                        </button>
+
+                        <button
+                          onClick={() => handleSendTestShift(1)}
+                          disabled={isSendingTest}
+                          className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-[#0b3a40] hover:bg-[#072428] text-[#c9a46b] rounded-xl text-[11px] font-bold uppercase transition-all disabled:opacity-50"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          Send Shift 1 PDF
+                        </button>
+
+                        <button
+                          onClick={() => handleSendTestShift(2)}
+                          disabled={isSendingTest}
+                          className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-gray-800 hover:bg-black text-white rounded-xl text-[11px] font-bold uppercase transition-all disabled:opacity-50"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          Send Shift 2 PDF
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: QR Container Box (5 Cols) */}
+                  <div className="lg:col-span-5 flex flex-col items-center justify-center p-6 bg-gray-50 rounded-2xl border border-dashed border-gray-300 min-h-[340px]">
+                    {waStatus === 'SCAN_QR' && waQrCode ? (
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="p-3 bg-white rounded-2xl shadow-lg border border-gray-200">
+                          <img
+                            src={waQrCode}
+                            alt="WhatsApp Web Multi-Device QR Code"
+                            className="w-56 h-56 object-contain"
+                          />
+                        </div>
+                        <div className="text-center">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+                            <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                            Awaiting QR scan on phone...
+                          </span>
+                          <p className="text-[10px] text-gray-500 mt-1">Auto-detected every 3s without page reload.</p>
+                        </div>
+                      </div>
+                    ) : waStatus === 'CONNECTED' ? (
+                      <div className="flex flex-col items-center text-center space-y-3 p-6 bg-emerald-50 rounded-2xl border border-emerald-200 w-full max-w-sm">
+                        <div className="w-16 h-16 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg">
+                          <CheckCircle2 className="w-9 h-9" />
+                        </div>
+                        <h4 className="text-base font-bold text-emerald-900 font-headline uppercase">Device Linked &amp; Connected!</h4>
+                        <p className="text-xs text-emerald-700">
+                          Account: <strong className="text-emerald-950 font-mono">+{waConnectedNumber}</strong>
+                        </p>
+                        <p className="text-[11px] text-emerald-600">
+                          Real-time WhatsApp notifications are armed. Every mobile app order from buyers will automatically dispatch an alert to <strong className="text-emerald-900">+91 {waRecipientPhone}</strong>.
+                        </p>
+                      </div>
+                    ) : waStatus === 'CONNECTING' ? (
+                      <div className="flex flex-col items-center text-center space-y-3">
+                        <RefreshCw className="w-10 h-10 text-[#0b3a40] animate-spin" />
+                        <span className="text-xs font-bold text-gray-700 font-headline uppercase">Initializing WebSocket Session...</span>
+                        <p className="text-[11px] text-gray-500 max-w-xs">Connecting to WhatsApp Multi-Device protocol and awaiting challenge emission.</p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center text-center space-y-3">
+                        <div className="w-16 h-16 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center">
+                          <QrCode className="w-8 h-8" />
+                        </div>
+                        <span className="text-xs font-bold text-gray-700 font-headline uppercase">No Device Paired</span>
+                        <p className="text-xs text-gray-500 max-w-xs">
+                          Click <strong>"Generate QR Code"</strong> to display the pairing challenge and link any mobile phone in 3 seconds.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Shift Schedule Timeline Info */}
+                <div className="mt-8 pt-6 border-t border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                    <span className="text-[10px] font-bold uppercase text-gray-500 font-headline">Trigger 1 · Real-Time Order Alert</span>
+                    <h5 className="text-xs font-bold text-gray-900 mt-1">Instant On Buyer Checkout</h5>
+                    <p className="text-[11px] text-gray-500 mt-1">Dispatches Order ID, buyer name, container, commodity list, and value instantly to WhatsApp.</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                    <span className="text-[10px] font-bold uppercase text-gray-500 font-headline">Trigger 2 · Shift 1 (Day Shift)</span>
+                    <h5 className="text-xs font-bold text-gray-900 mt-1">Daily at 11:30 PM IST</h5>
+                    <p className="text-[11px] text-gray-500 mt-1">Automated PDF with gross sales, average ticket size, and closing commodity stock balances.</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                    <span className="text-[10px] font-bold uppercase text-gray-500 font-headline">Trigger 3 · Shift 2 (Overnight Shift)</span>
+                    <h5 className="text-xs font-bold text-gray-900 mt-1">Daily at 10:00 AM IST</h5>
+                    <p className="text-[11px] text-gray-500 mt-1">Overnight export volume summary with vessel container tracking status audit.</p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
