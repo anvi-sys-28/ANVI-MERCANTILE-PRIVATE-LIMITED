@@ -811,17 +811,17 @@ export default function AdminDashboardPage() {
         description="Comprehensive trade administration, verification queues, and treasury clearance."
       />
 
-      <section className="pt-24 pb-16 bg-[#f7f5f0] dark:bg-[#070b14] min-h-screen">
-        <div className="w-full max-w-[1750px] mx-auto px-2 sm:px-4 lg:px-6">
-          <div className="flex flex-col lg:flex-row gap-6 items-start">
+      <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#070b14] flex">
             
-            {/* === 1. LEFT SIDEBAR NAVIGATION BAR (Color #003153) === */}
+            {/* === 1. LEFT SIDEBAR NAVIGATION BAR — Full-height edge-to-edge (Color #003153) === */}
             <aside 
               style={{ backgroundColor: '#003153' }}
-              className={`transition-all duration-300 rounded-2xl shadow-2xl border border-white/10 text-white shrink-0 sticky top-24 select-none ${
-                isSidebarOpen ? 'w-full lg:w-[285px] p-4' : 'w-full lg:w-[84px] p-3'
+              className={`admin-sidebar fixed top-0 bottom-0 left-0 z-50 h-screen flex flex-col justify-between overflow-y-auto transition-all duration-300 select-none text-white shadow-2xl ${
+                isSidebarOpen ? 'w-72 p-4' : 'w-20 p-3'
               }`}
             >
+              {/* Top group: Header + Navigation */}
+              <div className="flex-1 overflow-y-auto">
               {/* Header: Logo, Triotax / Anvi, Admin Panel, Enterprise Governance, Hamburger Button */}
               <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
                 <div className="flex items-center gap-3 overflow-hidden">
@@ -1109,8 +1109,11 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
+              {/* Close top group wrapper */}
+              </div>
+
               {/* Bottom: Sign Out Admin */}
-              <div className="pt-8 mt-6 border-t border-white/10">
+              <div className="pt-4 mt-2 border-t border-white/10 shrink-0">
                 <button
                   type="button"
                   onClick={handleLogout}
@@ -1123,37 +1126,32 @@ export default function AdminDashboardPage() {
               </div>
             </aside>
 
-            {/* === 2. MAIN CONTENT CONTAINER === */}
-            <main className="flex-1 min-w-0 w-full space-y-6">
+            {/* === 2. MAIN CONTENT CONTAINER (offset by sidebar width) === */}
+            <main className={`flex-1 min-w-0 w-full min-h-screen flex flex-col transition-all duration-300 ${
+              isSidebarOpen ? 'ml-72' : 'ml-20'
+            }`}>
               
-              {/* Top Admin Header Bar */}
-              <div 
-                style={{ backgroundColor: '#003153' }}
-                className="text-white rounded-2xl p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg border border-white/10"
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-widest bg-[#38bdf8] text-[#003153] px-2 py-0.5 rounded font-headline">
-                      ANVI HEADQUARTERS · TRADE DESK
-                    </span>
-                    <span className="text-xs text-white/70 font-mono">
-                      Role: ADMIN ({currentUser?.email || 'admin@anvimercantile.com'})
-                    </span>
-                  </div>
-                  <h1 className="text-xl sm:text-2xl font-extrabold font-headline uppercase text-white tracking-tight">
-                    {activeTab === 'dashboard' && 'Enterprise Trade Dashboard'}
-                    {activeTab === 'current-listed' && 'Current Listed Produce Lots (Mobile App)'}
-                    {activeTab === 'mobile-users' && 'Provision Mobile Accounts & Access'}
-                    {activeTab === 'mobile-orders' && 'Live Mobile Buyer Orders'}
-                    {activeTab === 'whatsapp' && 'WhatsApp Multi-Device Automation'}
-                    {activeTab === 'kpi' && 'Platform Performance & Export Volume'}
-                    {activeTab === 'kyc' && 'KYC Compliance & Verification Queue'}
-                    {activeTab === 'payments' && 'SWIFT & Bank Wire Approvals'}
-                    {activeTab === 'disputes' && 'Disputes Resolution Queue'}
+              {/* Clean top breadcrumb header matching reference image */}
+              <div className="bg-white dark:bg-[#0f172a] border-b border-gray-100 dark:border-white/10 px-6 md:px-8 py-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <h1 className="text-2xl sm:text-3xl font-extrabold font-headline text-[#003153] dark:text-white tracking-tight">
+                    {activeTab === 'dashboard' && 'Dashboard'}
+                    {activeTab === 'current-listed' && 'Current Listed'}
+                    {activeTab === 'mobile-users' && 'Manage Accounts'}
+                    {activeTab === 'mobile-orders' && 'Live Orders'}
+                    {activeTab === 'whatsapp' && 'WhatsApp'}
+                    {activeTab === 'kpi' && 'Platform KPI'}
+                    {activeTab === 'kyc' && 'KYC Verifications'}
+                    {activeTab === 'payments' && 'Wire Approvals'}
+                    {activeTab === 'disputes' && 'Disputes Queue'}
                   </h1>
+                  <span className="bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300 text-xs font-semibold px-2.5 py-0.5 rounded-full">Admin Console</span>
                 </div>
 
                 <div className="flex items-center gap-3">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 font-mono hidden md:block">
+                    {currentUser?.email || 'admin@anvimercantile.com'}
+                  </span>
                   <button
                     onClick={() => {
                       loadMobileData();
@@ -1162,7 +1160,7 @@ export default function AdminDashboardPage() {
                       const token = localStorage.getItem('access_token');
                       if (token) loadAdminData(token);
                     }}
-                    className="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    className="px-3.5 py-2 bg-[#003153] hover:bg-[#004a7a] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
                     title="Refresh Live Data"
                   >
                     <RefreshCw className={`w-3.5 h-3.5 ${isLoadingData || isSyncingListings ? 'animate-spin' : ''}`} />
@@ -1179,6 +1177,9 @@ export default function AdminDashboardPage() {
                   </a>
                 </div>
               </div>
+
+              {/* Main scrollable content area */}
+              <div className="flex-1 p-6 md:p-8 space-y-6 overflow-y-auto">
 
               {actionMessage && (
                 <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 text-emerald-800 dark:text-emerald-200 rounded-xl text-xs font-semibold flex items-center justify-between">
@@ -2847,10 +2848,9 @@ export default function AdminDashboardPage() {
             </div>
           )}
 
+              </div>{/* close scrollable content area */}
             </main>
-          </div>
-        </div>
-      </section>
+          </div>{/* close outer min-h-screen flex */}
     </>
   );
 }

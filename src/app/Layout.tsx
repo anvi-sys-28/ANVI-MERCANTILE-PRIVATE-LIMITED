@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Navbar } from '@/components/global/Navbar';
 import { Footer } from '@/components/global/Footer';
 import { MobileStickyQuoteCTA } from '@/components/global/MobileStickyQuoteCTA';
@@ -10,6 +10,9 @@ import { CartProvider } from '@/context/CartContext';
 import { CartDrawer } from '@/components/cart/CartDrawer';
 
 export function Layout() {
+  const location = useLocation();
+  const isAdminPage = location.pathname === '/admin';
+
   const [showIntro, setShowIntro] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -29,6 +32,16 @@ export function Layout() {
       // ignore
     }
   };
+
+  // Admin page gets a clean, chrome-less layout (no Navbar/Footer/floating widgets)
+  if (isAdminPage) {
+    return (
+      <CartProvider>
+        <ScrollToTop />
+        <Outlet />
+      </CartProvider>
+    );
+  }
 
   return (
     <CartProvider>

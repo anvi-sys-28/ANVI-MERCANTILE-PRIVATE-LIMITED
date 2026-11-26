@@ -88,13 +88,32 @@ html.light .bg-\[\#080b12\] {
   color: #0f172a !important;
 }
 
-html.light .text-white {
-  color: #0f172a !important;
+/* Preserving deliberate white text on dark buttons and sidebars in light mode */
+html.light .admin-sidebar,
+html.light .admin-sidebar *,
+html.light .admin-sidebar h1,
+html.light .admin-sidebar h2,
+html.light .admin-sidebar h3,
+html.light .admin-sidebar h4,
+html.light .admin-sidebar p,
+html.light .admin-sidebar span,
+html.light [style*="#003153"],
+html.light [style*="#003153"] *,
+html.light .bg-\[\#003153\],
+html.light .bg-\[\#003153\] * {
+  color: #ffffff !important;
 }
 
 html.light .text-slate-300,
 html.light .text-slate-400 {
   color: #475569 !important;
+}
+
+html.light .admin-sidebar .text-slate-300,
+html.light .admin-sidebar .text-slate-400,
+html.light [style*="#003153"] .text-slate-300,
+html.light [style*="#003153"] .text-slate-400 {
+  color: #cbd5e1 !important;
 }
 
 html.light .border-white\/10,
