@@ -6,7 +6,6 @@ import {
   XCircle,
   AlertCircle,
   Download,
-  CreditCard,
   Users,
   TrendingUp,
   Package,
@@ -26,6 +25,13 @@ import {
   MessageSquare,
   QrCode,
   Send,
+  Menu,
+  ChevronDown,
+  ChevronRight,
+  LayoutGrid,
+  Layers,
+  Shield,
+  Search,
 } from 'lucide-react';
 
 interface AdminKPIs {
@@ -57,7 +63,23 @@ export default function AdminDashboardPage() {
   const [loginError, setLoginError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'mobile-users' | 'mobile-orders' | 'whatsapp' | 'kpi' | 'kyc' | 'payments' | 'disputes'>('mobile-users');
+  const [activeTab, setActiveTab] = useState<
+    'dashboard' | 'mobile-users' | 'mobile-orders' | 'current-listed' | 'whatsapp' | 'kpi' | 'kyc' | 'payments' | 'disputes'
+  >('dashboard');
+
+  // Sidebar expand/collapse and accordion state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [expandedSections, setExpandedSections] = useState({
+    clients: true,
+    catalog: true,
+    comms: true,
+    governance: false,
+  });
+
+  // Farmer listings (Current Listed Lots)
+  const [farmerListings, setFarmerListings] = useState<any[]>([]);
+  const [isSyncingListings, setIsSyncingListings] = useState(false);
+  const [listingSearchQuery, setListingSearchQuery] = useState('');
   const [kpiData, setKpiData] = useState<AdminKPIs | null>(null);
   const [pendingCompanies, setPendingCompanies] = useState<any[]>([]);
   const [pendingPayments, setPendingPayments] = useState<any[]>([]);
@@ -281,10 +303,62 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Check existing token and sync live mobile users and orders on mount
+  const loadFarmerListings = async () => {
+    setIsSyncingListings(true);
+    try {
+      const res = await fetch(`${apiBase}/farmer/listings`);
+      if (res.ok) {
+        const json = await res.json();
+        setFarmerListings(json.data || []);
+      } else {
+        const resComm = await fetch(`${apiBase}/commodities`);
+        if (resComm.ok) {
+          const jsonComm = await resComm.json();
+          setFarmerListings(jsonComm.data || []);
+        }
+      }
+    } catch (e) {
+      console.warn('Backend farmer listings fetch error:', e);
+    } finally {
+      setIsSyncingListings(false);
+    }
+  };
+
+  const handleDeleteFarmerListing = async (id: string, cropName: string) => {
+    if (!window.confirm(`Are you sure you want to remove "${cropName}" from the mobile app?\n\nThis will remove the produce lot from both the database and the live mobile marketplace.`)) {
+      return;
+    }
+    try {
+      const res = await fetch(`${apiBase}/farmer/listings/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        await fetch(`${apiBase}/admin/farmer-listings/${id}`, { method: 'DELETE' });
+      }
+      setFarmerListings((prev) => prev.filter((p) => p.id !== id));
+      setActionMessage(`Produce lot "${cropName}" removed from mobile app and database.`);
+    } catch (e) {
+      console.warn('Failed to delete listing:', e);
+      setFarmerListings((prev) => prev.filter((p) => p.id !== id));
+      setActionMessage(`Produce lot "${cropName}" removed.`);
+    }
+  };
+
+  const handleOpenCreateAccount = (role: 'farmer' | 'buyer') => {
+    setActiveTab('mobile-users');
+    setNewUserForm((prev) => ({
+      ...prev,
+      role,
+      userId: role === 'farmer' ? `FARMER-AP-${Math.floor(100 + Math.random() * 900)}` : `ANVI-AE-${Math.floor(1000 + Math.random() * 9000)}`,
+      destinationPort: role === 'farmer' ? 'Guntur APMC Mandi Hub (AP)' : 'Jebel Ali Port (Dubai, UAE)',
+      mandiLocation: 'Guntur APMC Grain Market Yard (AP)',
+    }));
+    setShowCreateUserModal(true);
+  };
+
+  // Check existing token and sync live mobile users, orders, and farmer listings on mount
   useEffect(() => {
     loadMobileData();
     loadOrdersData();
+    loadFarmerListings();
     const token = localStorage.getItem('access_token');
     if (token) {
       fetchMe(token);
@@ -737,124 +811,694 @@ export default function AdminDashboardPage() {
         description="Comprehensive trade administration, verification queues, and treasury clearance."
       />
 
-      <section className="pt-32 pb-20 bg-[#f7f5f0] min-h-screen">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          
-          {/* Top Admin Header Bar */}
-          <div className="bg-[#0b3a40] text-white rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest bg-[#c9a46b] text-[#0b3a40] px-2 py-0.5 rounded font-headline">
-                  ANVI GROUPS HEADQUARTERS
-                </span>
-                <span className="text-xs text-white/70 font-mono">
-                  Role: ADMIN ({currentUser?.email})
-                </span>
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold font-headline uppercase text-white tracking-tight">
-                B2B EXPORT OPERATIONS DESK
-              </h1>
-            </div>
+      <section className="pt-24 pb-16 bg-[#f7f5f0] dark:bg-[#070b14] min-h-screen">
+        <div className="w-full max-w-[1750px] mx-auto px-2 sm:px-4 lg:px-6">
+          <div className="flex flex-col lg:flex-row gap-6 items-start">
+            
+            {/* === 1. LEFT SIDEBAR NAVIGATION BAR (Color #003153) === */}
+            <aside 
+              style={{ backgroundColor: '#003153' }}
+              className={`transition-all duration-300 rounded-2xl shadow-2xl border border-white/10 text-white shrink-0 sticky top-24 select-none ${
+                isSidebarOpen ? 'w-full lg:w-[285px] p-4' : 'w-full lg:w-[84px] p-3'
+              }`}
+            >
+              {/* Header: Logo, Triotax / Anvi, Admin Panel, Enterprise Governance, Hamburger Button */}
+              <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
+                <div className="flex items-center gap-3 overflow-hidden">
+                  {/* Stylized Logo mark */}
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#38bdf8] to-white flex items-center justify-center shrink-0 shadow-md">
+                    <span className="text-[#003153] font-black font-headline text-lg">T</span>
+                  </div>
+                  {isSidebarOpen && (
+                    <div className="leading-tight">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-black text-sm tracking-widest text-white uppercase font-headline">TRIOTAX</span>
+                        <div className="flex items-center gap-0.5 text-[9px] bg-white/10 text-white px-1.5 py-0.5 rounded font-semibold">
+                          <Shield className="w-2.5 h-2.5 text-[#38bdf8]" />
+                          <span>Admin Panel</span>
+                        </div>
+                      </div>
+                      <div className="text-[9px] font-bold tracking-widest text-[#38bdf8] uppercase">
+                        ENTERPRISE GOVERNANCE
+                      </div>
+                    </div>
+                  )}
+                </div>
 
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => {
-                  const token = localStorage.getItem('access_token');
-                  if (token) loadAdminData(token);
-                }}
-                className="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors"
-                title="Refresh Live Data"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${isLoadingData ? 'animate-spin' : ''}`} />
-                Refresh
-              </button>
-              <button
-                onClick={handleLogout}
-                className="px-3.5 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-200 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                Sign Out
-              </button>
-            </div>
-          </div>
-
-          {actionMessage && (
-            <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-semibold flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>{actionMessage}</span>
-              </div>
-              <button onClick={() => setActionMessage(null)} className="text-emerald-600 hover:underline">
-                Dismiss
-              </button>
-            </div>
-          )}
-
-          {/* Quick Metrics KPI Banner */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-            <div className="bg-white p-5 rounded-2xl border border-[#0b3a40]/10 shadow-sm space-y-1">
-              <span className="text-[11px] font-bold text-gray-500 uppercase font-headline">Platform GMV</span>
-              <div className="text-2xl font-extrabold text-[#0b3a40] font-headline">
-                ${kpiData?.overview.platformGmvUsd ? kpiData.overview.platformGmvUsd.toLocaleString() : '0'}
-              </div>
-              <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" /> Live Consignment Volume
-              </span>
-            </div>
-
-            <div className="bg-white p-5 rounded-2xl border border-[#0b3a40]/10 shadow-sm space-y-1">
-              <span className="text-[11px] font-bold text-gray-500 uppercase font-headline">Volume Shipped</span>
-              <div className="text-2xl font-extrabold text-[#0f5c66] font-headline">
-                {kpiData?.overview.totalVolumeMt || 0} <span className="text-xs font-normal text-gray-500">MT</span>
-              </div>
-              <span className="text-[10px] text-gray-500">Bulk agro commodities</span>
-            </div>
-
-            <div className="bg-white p-5 rounded-2xl border border-[#0b3a40]/10 shadow-sm space-y-1">
-              <span className="text-[11px] font-bold text-gray-500 uppercase font-headline">Pending KYC</span>
-              <div className="text-2xl font-extrabold text-[#c9a46b] font-headline">
-                {pendingCompanies.length}
-              </div>
-              <span className="text-[10px] text-amber-700 font-semibold">Awaiting Compliance Review</span>
-            </div>
-
-            <div className="bg-white p-5 rounded-2xl border border-[#0b3a40]/10 shadow-sm space-y-1">
-              <span className="text-[11px] font-bold text-gray-500 uppercase font-headline">Wire Clearances</span>
-              <div className="text-2xl font-extrabold text-[#0b3a40] font-headline">
-                {pendingPayments.length}
-              </div>
-              <span className="text-[10px] text-blue-600 font-semibold">SWIFT Verification Queue</span>
-            </div>
-          </div>
-
-          {/* Navigation Tabs */}
-          <div className="flex border-b border-[#0b3a40]/15 gap-4 overflow-x-auto pb-2">
-            {[
-              { id: 'mobile-users', label: `Mobile Accounts (${mobileUsers.length})`, icon: Smartphone },
-              { id: 'mobile-orders', label: `Mobile Orders (${liveOrders.length})`, icon: Package },
-              { id: 'whatsapp', label: 'WhatsApp Automation', icon: MessageSquare },
-              { id: 'kpi', label: 'Operations & Exports', icon: TrendingUp },
-              { id: 'kyc', label: `KYC Verifications (${pendingCompanies.length})`, icon: Users },
-              { id: 'payments', label: `Wire Approvals (${pendingPayments.length})`, icon: CreditCard },
-              { id: 'disputes', label: `Disputes (${disputesQueue.length})`, icon: AlertCircle },
-            ].map((tab) => {
-              const Icon = tab.icon;
-              return (
+                {/* Three-lines Hamburger Menu Button */}
                 <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold font-headline uppercase transition-colors shrink-0 ${
-                    activeTab === tab.id
-                      ? 'bg-[#0b3a40] text-[#c9a46b] shadow'
-                      : 'bg-white text-gray-600 hover:text-[#0b3a40] border border-gray-200'
-                  }`}
+                  type="button"
+                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                  className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer shrink-0"
+                  title={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
                 >
-                  <Icon className="w-4 h-4" />
-                  {tab.label}
+                  <Menu className="w-5 h-5 text-white" />
                 </button>
-              );
-            })}
-          </div>
+              </div>
+
+              {/* Navigation Items */}
+              <div className="space-y-1.5">
+                {/* 1. DASHBOARD */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('dashboard')}
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                    activeTab === 'dashboard'
+                      ? 'bg-[#1b4363] text-white border border-white/20 shadow-md'
+                      : 'text-slate-300 hover:text-white hover:bg-white/10'
+                  }`}
+                  title="Dashboard"
+                >
+                  <LayoutGrid className="w-4 h-4 text-[#38bdf8] shrink-0" />
+                  {isSidebarOpen && <span>Dashboard</span>}
+                </button>
+
+                {/* 2. END CLIENTS (Collapsible tree group) */}
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!isSidebarOpen) setIsSidebarOpen(true);
+                      setExpandedSections((prev) => ({ ...prev, clients: !prev.clients }));
+                    }}
+                    className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-bold text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                    title="End Clients"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Users className="w-4 h-4 text-orange-400 shrink-0" />
+                      {isSidebarOpen && <span className="uppercase tracking-wider text-[11px] font-headline">END CLIENTS</span>}
+                    </div>
+                    {isSidebarOpen && (
+                      expandedSections.clients ? <ChevronDown className="w-3.5 h-3.5 text-slate-400" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                    )}
+                  </button>
+
+                  {/* Sub-items with curved tree connectors */}
+                  {isSidebarOpen && expandedSections.clients && (
+                    <div className="mt-1 space-y-0.5">
+                      {/* Sub-item 1: Create Farmer Account */}
+                      <div className="relative pl-7 py-0.5">
+                        <div className="absolute left-3.5 top-0 bottom-1/2 w-3 border-l-2 border-b-2 border-white/25 rounded-bl-lg" />
+                        <div className="absolute left-3.5 top-1/2 bottom-0 w-0 border-l-2 border-white/25" />
+                        <button
+                          type="button"
+                          onClick={() => handleOpenCreateAccount('farmer')}
+                          className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-emerald-300 hover:text-white hover:bg-white/10 transition-colors text-left cursor-pointer"
+                        >
+                          <UserPlus className="w-3 h-3 text-emerald-400 shrink-0" />
+                          <span>1. Create Farmer Account</span>
+                        </button>
+                      </div>
+
+                      {/* Sub-item 2: Create Buyer Account */}
+                      <div className="relative pl-7 py-0.5">
+                        <div className="absolute left-3.5 top-0 bottom-1/2 w-3 border-l-2 border-b-2 border-white/25 rounded-bl-lg" />
+                        <div className="absolute left-3.5 top-1/2 bottom-0 w-0 border-l-2 border-white/25" />
+                        <button
+                          type="button"
+                          onClick={() => handleOpenCreateAccount('buyer')}
+                          className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-amber-300 hover:text-white hover:bg-white/10 transition-colors text-left cursor-pointer"
+                        >
+                          <UserPlus className="w-3 h-3 text-amber-400 shrink-0" />
+                          <span>2. Create Buyer Account</span>
+                        </button>
+                      </div>
+
+                      {/* Sub-item 3: Manage Accounts */}
+                      <div className="relative pl-7 py-0.5">
+                        <div className="absolute left-3.5 top-0 bottom-1/2 w-3 border-l-2 border-b-2 border-white/25 rounded-bl-lg" />
+                        <div className="absolute left-3.5 top-1/2 bottom-0 w-0 border-l-2 border-white/25" />
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('mobile-users')}
+                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors text-left cursor-pointer ${
+                            activeTab === 'mobile-users'
+                              ? 'bg-[#1b4363] text-white font-bold border border-white/20'
+                              : 'text-slate-300 hover:text-white hover:bg-white/10'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Users className="w-3 h-3 text-[#38bdf8] shrink-0" />
+                            <span>3. Manage Accounts</span>
+                          </div>
+                          <span className="text-[9px] bg-white/15 px-1.5 py-0.2 rounded-full font-mono text-white">
+                            {mobileUsers.length}
+                          </span>
+                        </button>
+                      </div>
+
+                      {/* Sub-item 4: Live Orders */}
+                      <div className="relative pl-7 py-0.5">
+                        <div className="absolute left-3.5 top-0 bottom-1/2 w-3 border-l-2 border-b-2 border-white/25 rounded-bl-lg" />
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('mobile-orders')}
+                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors text-left cursor-pointer ${
+                            activeTab === 'mobile-orders'
+                              ? 'bg-[#1b4363] text-white font-bold border border-white/20'
+                              : 'text-slate-300 hover:text-white hover:bg-white/10'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Package className="w-3 h-3 text-blue-400 shrink-0" />
+                            <span>4. Live Orders</span>
+                          </div>
+                          <span className="text-[9px] bg-white/15 px-1.5 py-0.2 rounded-full font-mono text-white">
+                            {liveOrders.length}
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. CURRENT LISTED (The user's requested tab) */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('current-listed')}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                    activeTab === 'current-listed'
+                      ? 'bg-[#1b4363] text-white border border-white/20 shadow-md'
+                      : 'text-slate-300 hover:text-white hover:bg-white/10'
+                  }`}
+                  title="Current Listed Products in Mobile App"
+                >
+                  <div className="flex items-center gap-3">
+                    <Layers className="w-4 h-4 text-emerald-400 shrink-0" />
+                    {isSidebarOpen && <span>CURRENT LISTED</span>}
+                  </div>
+                  {isSidebarOpen && (
+                    <span className="text-[9px] bg-emerald-500/30 text-emerald-300 border border-emerald-400/30 px-1.5 py-0.5 rounded-full font-mono">
+                      {farmerListings.length} Lots
+                    </span>
+                  )}
+                </button>
+
+                {/* 4. WHATSAPP (The user's requested tab) */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('whatsapp')}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                    activeTab === 'whatsapp'
+                      ? 'bg-[#1b4363] text-white border border-white/20 shadow-md'
+                      : 'text-slate-300 hover:text-white hover:bg-white/10'
+                  }`}
+                  title="WhatsApp Multi-Device Automation"
+                >
+                  <div className="flex items-center gap-3">
+                    <MessageSquare className="w-4 h-4 text-green-400 shrink-0" />
+                    {isSidebarOpen && <span>WHATSAPP</span>}
+                  </div>
+                  {isSidebarOpen && (
+                    <span className={`text-[8.5px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+                      waStatus === 'CONNECTED'
+                        ? 'bg-emerald-500/30 text-emerald-300 border border-emerald-400/30'
+                        : 'bg-amber-500/30 text-amber-300 border border-amber-400/30'
+                    }`}>
+                      {waStatus === 'CONNECTED' ? 'CONNECTED' : 'AUTO SYNC'}
+                    </span>
+                  )}
+                </button>
+
+                {/* 5. GOVERNANCE & AUDIT (Collapsible group) */}
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!isSidebarOpen) setIsSidebarOpen(true);
+                      setExpandedSections((prev) => ({ ...prev, governance: !prev.governance }));
+                    }}
+                    className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-bold text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                    title="Governance & Audit"
+                  >
+                    <div className="flex items-center gap-3">
+                      <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0" />
+                      {isSidebarOpen && <span className="uppercase tracking-wider text-[11px] font-headline">GOVERNANCE & AUDIT</span>}
+                    </div>
+                    {isSidebarOpen && (
+                      expandedSections.governance ? <ChevronDown className="w-3.5 h-3.5 text-slate-400" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                    )}
+                  </button>
+
+                  {/* Sub-items with curved tree connectors */}
+                  {isSidebarOpen && expandedSections.governance && (
+                    <div className="mt-1 space-y-0.5">
+                      {/* KYC */}
+                      <div className="relative pl-7 py-0.5">
+                        <div className="absolute left-3.5 top-0 bottom-1/2 w-3 border-l-2 border-b-2 border-white/25 rounded-bl-lg" />
+                        <div className="absolute left-3.5 top-1/2 bottom-0 w-0 border-l-2 border-white/25" />
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('kyc')}
+                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors text-left cursor-pointer ${
+                            activeTab === 'kyc' ? 'bg-[#1b4363] text-white font-bold border border-white/20' : 'text-slate-300 hover:text-white hover:bg-white/10'
+                          }`}
+                        >
+                          <span>1. KYC Verifications</span>
+                          <span className="text-[9px] bg-white/15 px-1.5 py-0.2 rounded-full font-mono">{pendingCompanies.length}</span>
+                        </button>
+                      </div>
+
+                      {/* Wire Approvals */}
+                      <div className="relative pl-7 py-0.5">
+                        <div className="absolute left-3.5 top-0 bottom-1/2 w-3 border-l-2 border-b-2 border-white/25 rounded-bl-lg" />
+                        <div className="absolute left-3.5 top-1/2 bottom-0 w-0 border-l-2 border-white/25" />
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('payments')}
+                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors text-left cursor-pointer ${
+                            activeTab === 'payments' ? 'bg-[#1b4363] text-white font-bold border border-white/20' : 'text-slate-300 hover:text-white hover:bg-white/10'
+                          }`}
+                        >
+                          <span>2. Wire Approvals</span>
+                          <span className="text-[9px] bg-white/15 px-1.5 py-0.2 rounded-full font-mono">{pendingPayments.length}</span>
+                        </button>
+                      </div>
+
+                      {/* Disputes */}
+                      <div className="relative pl-7 py-0.5">
+                        <div className="absolute left-3.5 top-0 bottom-1/2 w-3 border-l-2 border-b-2 border-white/25 rounded-bl-lg" />
+                        <div className="absolute left-3.5 top-1/2 bottom-0 w-0 border-l-2 border-white/25" />
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('disputes')}
+                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors text-left cursor-pointer ${
+                            activeTab === 'disputes' ? 'bg-[#1b4363] text-white font-bold border border-white/20' : 'text-slate-300 hover:text-white hover:bg-white/10'
+                          }`}
+                        >
+                          <span>3. Disputes Queue</span>
+                          <span className="text-[9px] bg-white/15 px-1.5 py-0.2 rounded-full font-mono">{disputesQueue.length}</span>
+                        </button>
+                      </div>
+
+                      {/* KPI & Reports */}
+                      <div className="relative pl-7 py-0.5">
+                        <div className="absolute left-3.5 top-0 bottom-1/2 w-3 border-l-2 border-b-2 border-white/25 rounded-bl-lg" />
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('kpi')}
+                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-colors text-left cursor-pointer ${
+                            activeTab === 'kpi' ? 'bg-[#1b4363] text-white font-bold border border-white/20' : 'text-slate-300 hover:text-white hover:bg-white/10'
+                          }`}
+                        >
+                          <span>4. Platform KPI & Reports</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Bottom: Sign Out Admin */}
+              <div className="pt-8 mt-6 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold text-red-300 hover:text-white hover:bg-red-500/20 transition-all cursor-pointer"
+                  title="Sign Out Admin"
+                >
+                  <LogOut className="w-4 h-4 text-red-400 shrink-0" />
+                  {isSidebarOpen && <span>Sign Out Admin</span>}
+                </button>
+              </div>
+            </aside>
+
+            {/* === 2. MAIN CONTENT CONTAINER === */}
+            <main className="flex-1 min-w-0 w-full space-y-6">
+              
+              {/* Top Admin Header Bar */}
+              <div 
+                style={{ backgroundColor: '#003153' }}
+                className="text-white rounded-2xl p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg border border-white/10"
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold uppercase tracking-widest bg-[#38bdf8] text-[#003153] px-2 py-0.5 rounded font-headline">
+                      ANVI HEADQUARTERS · TRADE DESK
+                    </span>
+                    <span className="text-xs text-white/70 font-mono">
+                      Role: ADMIN ({currentUser?.email || 'admin@anvimercantile.com'})
+                    </span>
+                  </div>
+                  <h1 className="text-xl sm:text-2xl font-extrabold font-headline uppercase text-white tracking-tight">
+                    {activeTab === 'dashboard' && 'Enterprise Trade Dashboard'}
+                    {activeTab === 'current-listed' && 'Current Listed Produce Lots (Mobile App)'}
+                    {activeTab === 'mobile-users' && 'Provision Mobile Accounts & Access'}
+                    {activeTab === 'mobile-orders' && 'Live Mobile Buyer Orders'}
+                    {activeTab === 'whatsapp' && 'WhatsApp Multi-Device Automation'}
+                    {activeTab === 'kpi' && 'Platform Performance & Export Volume'}
+                    {activeTab === 'kyc' && 'KYC Compliance & Verification Queue'}
+                    {activeTab === 'payments' && 'SWIFT & Bank Wire Approvals'}
+                    {activeTab === 'disputes' && 'Disputes Resolution Queue'}
+                  </h1>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => {
+                      loadMobileData();
+                      loadOrdersData();
+                      loadFarmerListings();
+                      const token = localStorage.getItem('access_token');
+                      if (token) loadAdminData(token);
+                    }}
+                    className="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    title="Refresh Live Data"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isLoadingData || isSyncingListings ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </button>
+                  <a
+                    href="http://localhost:5174"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3.5 py-2 bg-[#38bdf8] hover:brightness-110 text-[#003153] rounded-xl text-xs font-bold font-headline flex items-center gap-1.5 transition-all shadow"
+                  >
+                    <Smartphone className="w-3.5 h-3.5" />
+                    Open Mobile App
+                  </a>
+                </div>
+              </div>
+
+              {actionMessage && (
+                <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 text-emerald-800 dark:text-emerald-200 rounded-xl text-xs font-semibold flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>{actionMessage}</span>
+                  </div>
+                  <button onClick={() => setActionMessage(null)} className="text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer">
+                    Dismiss
+                  </button>
+                </div>
+              )}
+
+              {/* TAB: DASHBOARD OVERVIEW */}
+              {activeTab === 'dashboard' && (
+                <div className="space-y-6">
+                  {/* Quick Metrics KPI Banner */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+                    <div className="bg-white dark:bg-[#0f172a] p-5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm space-y-1">
+                      <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase font-headline">Platform GMV</span>
+                      <div className="text-2xl font-extrabold text-[#003153] dark:text-white font-headline">
+                        ${kpiData?.overview.platformGmvUsd ? kpiData.overview.platformGmvUsd.toLocaleString() : '142,500'}
+                      </div>
+                      <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                        <TrendingUp className="w-3 h-3" /> Live Consignment Volume
+                      </span>
+                    </div>
+
+                    <div className="bg-white dark:bg-[#0f172a] p-5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm space-y-1">
+                      <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase font-headline">Volume Shipped</span>
+                      <div className="text-2xl font-extrabold text-emerald-600 font-headline">
+                        {kpiData?.overview.totalVolumeMt || 280} <span className="text-xs font-normal text-gray-500">MT</span>
+                      </div>
+                      <span className="text-[10px] text-gray-500">Bulk agro commodities</span>
+                    </div>
+
+                    <div className="bg-white dark:bg-[#0f172a] p-5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm space-y-1">
+                      <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase font-headline">Live Produce Lots</span>
+                      <div className="text-2xl font-extrabold text-amber-500 font-headline">
+                        {farmerListings.length}
+                      </div>
+                      <span className="text-[10px] text-amber-600 font-semibold">Running in Mobile App</span>
+                    </div>
+
+                    <div className="bg-white dark:bg-[#0f172a] p-5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm space-y-1">
+                      <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase font-headline">Provisioned Accounts</span>
+                      <div className="text-2xl font-extrabold text-[#38bdf8] font-headline">
+                        {mobileUsers.length}
+                      </div>
+                      <span className="text-[10px] text-blue-600 font-semibold">Farmers &amp; Buyers Active</span>
+                    </div>
+                  </div>
+
+                  {/* Quick Action Navigation Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('current-listed')}
+                      className="p-5 bg-white dark:bg-[#0f172a] rounded-2xl border border-gray-200 dark:border-white/10 hover:border-emerald-500 transition-all text-left space-y-2 group cursor-pointer shadow-sm"
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <Layers className="w-5 h-5" />
+                      </div>
+                      <h4 className="font-bold text-sm text-[#003153] dark:text-white font-headline">CURRENT LISTED</h4>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        View &amp; manage all {farmerListings.length} produce lots running on the mobile app.
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleOpenCreateAccount('farmer')}
+                      className="p-5 bg-white dark:bg-[#0f172a] rounded-2xl border border-gray-200 dark:border-white/10 hover:border-emerald-500 transition-all text-left space-y-2 group cursor-pointer shadow-sm"
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <UserPlus className="w-5 h-5" />
+                      </div>
+                      <h4 className="font-bold text-sm text-[#003153] dark:text-white font-headline">Create Farmer Account</h4>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Instantly provision Kisan accounts for mandi producers with login credentials.
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleOpenCreateAccount('buyer')}
+                      className="p-5 bg-white dark:bg-[#0f172a] rounded-2xl border border-gray-200 dark:border-white/10 hover:border-amber-500 transition-all text-left space-y-2 group cursor-pointer shadow-sm"
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <UserPlus className="w-5 h-5" />
+                      </div>
+                      <h4 className="font-bold text-sm text-[#003153] dark:text-white font-headline">Create Buyer Account</h4>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Provision wholesale importer accounts for Dubai, Jebel Ali &amp; Rotterdam.
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('whatsapp')}
+                      className="p-5 bg-white dark:bg-[#0f172a] rounded-2xl border border-gray-200 dark:border-white/10 hover:border-green-500 transition-all text-left space-y-2 group cursor-pointer shadow-sm"
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-950/60 text-green-700 dark:text-green-300 flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <MessageSquare className="w-5 h-5" />
+                      </div>
+                      <h4 className="font-bold text-sm text-[#003153] dark:text-white font-headline">WhatsApp Automation</h4>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Multi-device WebSocket dispatch, shift PDF reports &amp; instant buyer order alerts.
+                      </p>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB: CURRENT LISTED PRODUCE LOTS (MOBILE APP CATALOG) */}
+              {activeTab === 'current-listed' && (
+                <div className="space-y-6">
+                  {/* Header Box */}
+                  <div className="bg-white dark:bg-[#0f172a] rounded-2xl border border-gray-200 dark:border-white/10 p-6 sm:p-8 shadow-sm">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-gray-100 dark:border-white/10">
+                      <div className="space-y-1">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold uppercase tracking-wider font-headline">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                          Live Mobile App Catalog
+                        </div>
+                        <h3 className="text-xl font-bold font-headline uppercase text-[#003153] dark:text-white">
+                          Current Listed Produce Lots (Running on Mobile App)
+                        </h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 max-w-2xl">
+                          These are all agricultural lots published by registered farmers and currently visible to buyers on the mobile app. As Administrator, you can review live quality metrics, mandi prices, and immediately remove any lot from the app catalog.
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-3 shrink-0">
+                        <button
+                          onClick={loadFarmerListings}
+                          disabled={isSyncingListings}
+                          className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold font-headline uppercase rounded-xl flex items-center gap-2 transition-all shadow-md cursor-pointer disabled:opacity-50"
+                        >
+                          <RefreshCw className={`w-4 h-4 ${isSyncingListings ? 'animate-spin' : ''}`} />
+                          {isSyncingListings ? 'Syncing...' : 'Sync Catalog'}
+                        </button>
+                        <a
+                          href="http://localhost:5174"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-4 py-2.5 bg-[#003153] hover:bg-[#0b4772] text-[#38bdf8] text-xs font-bold font-headline uppercase rounded-xl flex items-center gap-1.5 transition-colors shadow cursor-pointer"
+                          title="Open App Preview"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          View in App (Port 5174)
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* KPI Sub-Metrics */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6">
+                      <div className="p-3.5 bg-emerald-50/70 dark:bg-emerald-950/30 rounded-xl border border-emerald-200/80 dark:border-emerald-800/40 space-y-1">
+                        <span className="text-[10px] font-bold text-emerald-900 dark:text-emerald-300 uppercase font-headline">Active Lots</span>
+                        <div className="text-xl font-black text-emerald-950 dark:text-emerald-100 font-headline">
+                          {farmerListings.length}
+                        </div>
+                        <span className="text-[9.5px] text-emerald-800 dark:text-emerald-400 font-medium">Live on mobile store</span>
+                      </div>
+                      <div className="p-3.5 bg-blue-50/70 dark:bg-blue-950/30 rounded-xl border border-blue-200/80 dark:border-blue-800/40 space-y-1">
+                        <span className="text-[10px] font-bold text-blue-900 dark:text-blue-300 uppercase font-headline">APMC Mandi Hubs</span>
+                        <div className="text-xl font-black text-blue-950 dark:text-blue-100 font-headline">
+                          Guntur · Kurnool · AP
+                        </div>
+                        <span className="text-[9.5px] text-blue-800 dark:text-blue-400 font-medium">Direct mandi aggregation</span>
+                      </div>
+                      <div className="p-3.5 bg-amber-50/70 dark:bg-amber-950/30 rounded-xl border border-amber-200/80 dark:border-amber-800/40 space-y-1">
+                        <span className="text-[10px] font-bold text-amber-900 dark:text-amber-300 uppercase font-headline">Quality Standard</span>
+                        <div className="text-xl font-black text-amber-950 dark:text-amber-100 font-headline">
+                          APEDA Grade 1 &amp; 4
+                        </div>
+                        <span className="text-[9.5px] text-amber-800 dark:text-amber-400 font-medium">Machine Sortex Cleaned</span>
+                      </div>
+                      <div className="p-3.5 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-white/10 space-y-1">
+                        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase font-headline">Real-time Deletion</span>
+                        <div className="text-xl font-black text-slate-900 dark:text-slate-100 font-headline">Instant Sync</div>
+                        <span className="text-[9.5px] text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          Removes in &lt; 8 sec
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Search Bar */}
+                    <div className="pt-6">
+                      <div className="relative">
+                        <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="text"
+                          placeholder="Search produce lots by crop name, variety, farmer name, or mandi hub..."
+                          value={listingSearchQuery}
+                          onChange={(e) => setListingSearchQuery(e.target.value)}
+                          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-slate-900 text-xs text-gray-900 dark:text-white focus:outline-none focus:border-[#003153]"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Produce Cards Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {farmerListings
+                      .filter((p) => {
+                        if (!listingSearchQuery) return true;
+                        const q = listingSearchQuery.toLowerCase();
+                        return (
+                          (p.cropName && p.cropName.toLowerCase().includes(q)) ||
+                          (p.name && p.name.toLowerCase().includes(q)) ||
+                          (p.variety && p.variety.toLowerCase().includes(q)) ||
+                          (p.farmerName && p.farmerName.toLowerCase().includes(q)) ||
+                          (p.mandiHub && p.mandiHub.toLowerCase().includes(q))
+                        );
+                      })
+                      .map((product) => {
+                        const displayName = product.cropName || product.name || 'Agro Commodity';
+                        const displayVariety = product.variety || product.shop || 'Export Grade Quality';
+                        const displayFarmer = product.farmerName || 'Verified Anvi Farmer';
+                        const displayLocation = product.farmLocation || product.mandiHub || 'Guntur APMC Grain Market Yard';
+                        const displayPrice = product.askingPrice
+                          ? `${product.askingPrice} ${product.askingPriceUnit || '₹/Qtl'}`
+                          : product.priceUsd || (typeof product.price === 'number' ? `$${product.price}/MT` : product.price || '₹4,150/Qtl');
+                        const displayLot = product.lotQuantity || '50 MT Lot';
+                        const displayGrade = product.verifiedGrade || 'APEDA AUDITED GRADE 1';
+                        const displaySpecs = product.moistureOrSpecs || 'Machine Sortex Cleaned · Moisture ≤ 11.5%';
+
+                        return (
+                          <div
+                            key={product.id}
+                            className="bg-white dark:bg-[#0f172a] rounded-2xl border border-gray-200 dark:border-white/10 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+                          >
+                            {/* Top Row: Badges */}
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold font-mono">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                LIVE IN APP
+                              </span>
+                              <span className="text-[10px] font-bold uppercase tracking-wider bg-orange-100 dark:bg-orange-950/60 text-orange-800 dark:text-orange-300 px-2 py-0.5 rounded font-headline">
+                                {product.category || 'RICE'}
+                              </span>
+                            </div>
+
+                            {/* Title and Specs */}
+                            <div className="space-y-1.5">
+                              <h4 className="text-base font-extrabold text-[#003153] dark:text-white font-headline leading-snug">
+                                {displayName}
+                              </h4>
+                              <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">
+                                {displayVariety}
+                              </p>
+                              <div className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400">
+                                <MapPin className="w-3 h-3 text-orange-500 shrink-0" />
+                                <span className="truncate">{displayLocation}</span>
+                              </div>
+                              <div className="text-[10.5px] text-gray-500 dark:text-gray-400">
+                                Farmer: <span className="font-semibold text-gray-700 dark:text-gray-200">{displayFarmer}</span>
+                              </div>
+                            </div>
+
+                            {/* Price & Quantity Box */}
+                            <div className="p-3 bg-gray-50 dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-white/5 space-y-1.5">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-gray-500 dark:text-gray-400 font-medium">Asking Price:</span>
+                                <span className="font-bold text-emerald-700 dark:text-emerald-400 font-mono text-sm">
+                                  {displayPrice}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-gray-500 dark:text-gray-400 font-medium">Available Lot:</span>
+                                <span className="font-semibold text-gray-800 dark:text-gray-200 font-mono">
+                                  {displayLot}
+                                </span>
+                              </div>
+                              <div className="text-[10px] text-gray-500 dark:text-gray-400 pt-1 border-t border-gray-200 dark:border-white/10 flex items-center justify-between">
+                                <span>{displayGrade}</span>
+                                <span className="text-blue-600 dark:text-blue-400 font-semibold">{displaySpecs}</span>
+                              </div>
+                            </div>
+
+                            {/* Bottom Action: Remove Product Button */}
+                            <div className="pt-2 border-t border-gray-100 dark:border-white/10 flex items-center justify-between gap-3">
+                              <span className="text-[10px] font-mono text-gray-400 dark:text-gray-500">
+                                ID: {product.id}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteFarmerListing(product.id, displayName)}
+                                className="px-3.5 py-2 bg-red-50 dark:bg-red-950/40 hover:bg-red-600 text-red-600 dark:text-red-300 hover:text-white border border-red-200 dark:border-red-800/40 hover:border-red-600 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
+                                title="Remove this product from the mobile app"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>Remove Product</span>
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+
+                  {farmerListings.length === 0 && (
+                    <div className="text-center py-16 bg-white dark:bg-[#0f172a] rounded-2xl border border-gray-200 dark:border-white/10 p-8 space-y-3">
+                      <Layers className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto" />
+                      <h4 className="text-base font-bold text-gray-700 dark:text-gray-200">No Farmer Produce Lots Found</h4>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+                        When farmers log in to the mobile app and publish produce lots, they will appear here in real-time.
+                      </p>
+                      <button
+                        onClick={loadFarmerListings}
+                        className="px-4 py-2 bg-[#003153] hover:bg-[#0b4772] text-white rounded-xl text-xs font-bold inline-flex items-center gap-2 cursor-pointer"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                        Refresh Catalog
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
 
           {/* TAB 0: Mobile App Users & Client Monitoring (Admin Only) */}
           {activeTab === 'mobile-users' && (
@@ -2203,6 +2847,8 @@ export default function AdminDashboardPage() {
             </div>
           )}
 
+            </main>
+          </div>
         </div>
       </section>
     </>

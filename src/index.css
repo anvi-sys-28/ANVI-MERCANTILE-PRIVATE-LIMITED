@@ -134,6 +134,70 @@ html.dark .shipping-ticker-section svg text.brand-pink {
   fill: #E4007F !important;
 }
 
+/* === DARK THEME GLOBAL OVERRIDES (FIX BLACK TEXT ON DARK BACKGROUND) === */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body,
+html.dark main {
+  background-color: #05080e !important;
+  color: #f8fafc !important;
+}
+
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6 {
+  color: #ffffff !important;
+}
+
+html.dark .text-gray-900,
+html.dark .text-gray-800,
+html.dark .text-gray-700,
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-slate-700,
+html.dark .text-black,
+html.dark .text-\[\#0b3a40\],
+html.dark .text-\[\#0f172a\],
+html.dark .text-\[\#072013\],
+html.dark .text-\[\#0F172A\] {
+  color: #f8fafc !important;
+}
+
+html.dark .text-gray-600,
+html.dark .text-gray-500,
+html.dark .text-slate-600,
+html.dark .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+html.dark .bg-white {
+  background-color: #0c1222 !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .bg-gray-50,
+html.dark .bg-gray-100,
+html.dark .bg-slate-50,
+html.dark .bg-slate-100 {
+  background-color: #141b2d !important;
+  color: #f8fafc !important;
+}
+
+html.dark .border-gray-200,
+html.dark .border-gray-300,
+html.dark .border-slate-200,
+html.dark .border-slate-300,
+html.dark .border-\[\#0b3a40\]\/10,
+html.dark .border-\[\#0b3a40\]\/15 {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
 
 /* Custom Glassmorphism & Hairline Utilities */
 .glass-card {
