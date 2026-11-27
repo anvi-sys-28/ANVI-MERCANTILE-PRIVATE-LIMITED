@@ -201,7 +201,7 @@ export default function ProductsPage() {
         description="Explore fresh export commodities directly sourced from certified Indian farms: Green Chilly, Pomegranate, Coconut, Makhana, Basmati Rice, Guava, and Grapes."
       />
 
-      <div className="min-h-screen bg-[#F6F7F6] text-gray-900 font-sans antialiased pt-16 sm:pt-20 pb-16 selection:bg-emerald-100 selection:text-emerald-900">
+      <div className="products-page min-h-screen bg-[#F6F7F6] text-gray-900 font-sans antialiased pt-16 sm:pt-20 pb-16 selection:bg-emerald-100 selection:text-emerald-900">
         {/* ========================================================================= */}
         {/* TOP DIV: FULL-WIDTH HORIZONTAL HERO SLIDER (EDGE-TO-EDGE, NO BOX)        */}
         {/* ========================================================================= */}

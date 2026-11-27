@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Theme switching is driven by the .dark class on <html> (ThemeToggle.tsx),
+   not by the OS preference, so bind Tailwind's dark: variant to that class. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-navy-dark: #05080e;
   --color-navy-marine: #0a0d14;
@@ -179,6 +183,7 @@ html.dark .text-gray-700,
 html.dark .text-slate-900,
 html.dark .text-slate-800,
 html.dark .text-slate-700,
+html.dark .text-slate-950,
 html.dark .text-black,
 html.dark .text-\[\#0b3a40\],
 html.dark .text-\[\#0f172a\],
@@ -217,6 +222,121 @@ html.dark .border-\[\#0b3a40\]\/15 {
   border-color: rgba(255, 255, 255, 0.12) !important;
 }
 
+
+/* === PRODUCTS PAGE DARK THEME OVERRIDES === */
+/* The products page is authored light-first, so these surfaces need explicit
+   dark values when <html> carries the .dark class. */
+html.dark .products-page {
+  background-color: #05080e !important;
+  color: #f8fafc !important;
+}
+
+/* Selected rice grade row + pale green tints */
+html.dark .products-page .bg-\[\#EAF5EF\],
+html.dark .products-page .bg-\[\#EBF7EE\],
+html.dark .products-page .bg-\[\#F2F8F4\] {
+  background-color: rgba(19, 94, 56, 0.28) !important;
+  color: #f8fafc !important;
+}
+
+/* Near-black titles and dark-green accent icons */
+html.dark .products-page .text-gray-950,
+html.dark .products-page .text-\[\#135E38\] {
+  color: #f8fafc !important;
+}
+
+html.dark .products-page .text-\[\#135E38\] svg,
+html.dark .products-page .text-\[\#135E38\] svg * {
+  color: #34d399 !important;
+  stroke: #34d399 !important;
+}
+
+/* Hairline dividers between rice grades */
+html.dark .products-page .border-gray-200\/90,
+html.dark .products-page .border-gray-100,
+html.dark .products-page .border-\[\#CDE8D8\],
+html.dark .products-page .divide-gray-300 > * + * {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Unselected row hover */
+html.dark .products-page .hover\:bg-gray-50\/70:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Pale promo banners */
+html.dark .products-page [class*="from-[#FFF9EA]"] {
+  background-image: linear-gradient(135deg, #1a1408 0%, #141008 60%, #0d0a04 100%) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .products-page [class*="from-[#EFF9F1]"] {
+  background-image: linear-gradient(135deg, #07170e 0%, #07130f 60%, #05080e 100%) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Hero banner: swap the white readability wash for a dark one */
+html.dark .products-page .hero-wash {
+  background-image: linear-gradient(
+    to right,
+    rgba(5, 8, 14, 0.96) 0%,
+    rgba(5, 8, 14, 0.88) 40%,
+    rgba(5, 8, 14, 0.45) 62%,
+    transparent 100%
+  ) !important;
+}
+
+/* Hero badge + verification pills sitting on the banner image */
+html.dark .products-page .bg-white\/95,
+html.dark .products-page .bg-white\/90 {
+  background-color: rgba(5, 8, 14, 0.82) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: #f8fafc !important;
+}
+
+/* === PRODUCTS PAGE NAVBAR DARK OVERRIDES === */
+/* The navbar runs a light "products" skin (bg-white/*, stone text); invert it
+   when the dark theme class is active. */
+html.dark header[class*="bg-white/"] {
+  background-color: rgba(5, 8, 14, 0.92) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark header[class*="bg-white/"] .text-stone-950,
+html.dark header[class*="bg-white/"] .text-stone-900,
+html.dark header[class*="bg-white/"] .text-stone-800 {
+  color: #f8fafc !important;
+}
+
+html.dark header[class*="bg-white/"] .bg-stone-900 {
+  background-color: #f8fafc !important;
+}
+
+html.dark header[class*="bg-white/"] .border-stone-950 {
+  border-color: #f8fafc !important;
+}
+
+html.dark header[class*="bg-white/"] .text-\[\#135E38\] {
+  color: #34d399 !important;
+}
+
+html.dark header[class*="bg-white/"] .border-\[\#135E38\] {
+  border-color: #34d399 !important;
+}
+
+html.dark header[class*="bg-white/"] .hover\:text-black:hover,
+html.dark header[class*="bg-white/"] .hover\:text-\[\#135E38\]:hover {
+  color: #ffffff !important;
+}
+
+html.dark header[class*="bg-white/"] .group:hover .group-hover\:bg-black {
+  background-color: #ffffff !important;
+}
+
+/* Animated "ANVI MERCANTILE" stroke wordmark is filled dark navy by default */
+html.dark header[class*="bg-white/"] svg text {
+  fill: #f8fafc !important;
+}
 
 /* Custom Glassmorphism & Hairline Utilities */
 .glass-card {

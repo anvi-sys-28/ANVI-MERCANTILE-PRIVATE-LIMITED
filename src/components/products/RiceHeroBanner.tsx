@@ -23,7 +23,7 @@ const PRODUCT_SLIDES: ProductSlide[] = [
     titlePrefix: 'Featured Brand Products —',
     titleHighlight: 'Premium Indian Rice',
     description: 'Direct-from-mill Sona Masoori & Kolam varieties, export-grade quality with verified purity, moisture control and container-ready standards.',
-    image: '/r.png',
+    image: '/r.webp',
     fallbackImage: '/images/rice_hero_banner.jpg',
   },
   {
@@ -34,7 +34,7 @@ const PRODUCT_SLIDES: ProductSlide[] = [
     titlePrefix: 'Featured Brand Products —',
     titleHighlight: 'Fresh Green Chilly',
     description: 'Farm-fresh G4 & pungent green chillies, sortex graded, pre-cooled and packed in ventilated reefer export cartons.',
-    image: '/c.png',
+    image: '/c.webp',
     fallbackImage: '/images/green_chilly.webp',
   },
   {
@@ -45,7 +45,7 @@ const PRODUCT_SLIDES: ProductSlide[] = [
     titlePrefix: 'Featured Brand Products —',
     titleHighlight: 'Ruby Red Pomegranates',
     description: 'Direct-from-orchard Bhagwa variety with deep red arils, high Brix sweetness, packed in 3.5kg / 5kg export CFB master boxes.',
-    image: '/p.png',
+    image: '/p.webp',
     fallbackImage: '/images/pomegranate.webp',
   },
   {
@@ -56,7 +56,7 @@ const PRODUCT_SLIDES: ProductSlide[] = [
     titlePrefix: 'Featured Brand Products —',
     titleHighlight: 'Organic Popped Makhana',
     description: 'Jumbo 5-6 sutta graded lotus foxnuts, roasted white, moisture-sealed in nitrogen-flushed food-grade export packaging.',
-    image: '/m.png',
+    image: '/m.webp',
     fallbackImage: '/images/makhana.webp',
   },
   {
@@ -67,7 +67,7 @@ const PRODUCT_SLIDES: ProductSlide[] = [
     titlePrefix: 'Featured Brand Products —',
     titleHighlight: 'Sweet Seedless Grapes',
     description: 'Thompson seedless & Sharad dark purple table grapes, harvested at optimum Brix with sulphur-pad cold chain protection.',
-    image: '/g.png',
+    image: '/g.webp',
     fallbackImage: '/images/grapes.webp',
   },
   {
@@ -78,7 +78,7 @@ const PRODUCT_SLIDES: ProductSlide[] = [
     titlePrefix: 'Featured Brand Products —',
     titleHighlight: 'Farm-Fresh Pink Guavas',
     description: 'Taiwan Pink and Allahabad Safeda guavas, individually foam-netted with crisp texture, high vitamin C and rich aroma.',
-    image: '/gu.png',
+    image: '/gu.webp',
     fallbackImage: '/images/guava.webp',
   },
 ];
@@ -165,7 +165,7 @@ export function RiceHeroBanner() {
           />
 
           {/* Enhanced white-to-transparent gradient wash ensuring 100% text readability against any green or rich background imagery */}
-          <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 via-40% sm:via-white/50 sm:via-55% to-transparent pointer-events-none z-1" />
+          <div className="hero-wash absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 via-40% sm:via-white/50 sm:via-55% to-transparent pointer-events-none z-1" />
 
           {/* Centered Content Container matching the 12-column layout grid */}
           <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center space-y-1.5 sm:space-y-2 z-10">
