@@ -20,6 +20,7 @@ const InsightDetailPage = lazy(() => import('@/pages/InsightDetailPage'));
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
 const TermsPage = lazy(() => import('@/pages/TermsPage'));
 const AdminDashboardPage = lazy(() => import('@/pages/AdminDashboardPage'));
+const GifPreloaderPage = lazy(() => import('@/pages/GifPreloaderPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
 const PageLoader = () => (
@@ -102,6 +103,10 @@ export const router = createBrowserRouter([
       {
         path: 'admin',
         element: withSuspense(AdminDashboardPage),
+      },
+      {
+        path: 'gif',
+        element: withSuspense(GifPreloaderPage),
       },
       {
         path: '*',

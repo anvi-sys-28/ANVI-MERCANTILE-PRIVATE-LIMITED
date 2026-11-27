@@ -47,7 +47,7 @@ export function Layout() {
     <CartProvider>
       <div className="min-h-screen flex flex-col justify-between bg-[#030712] text-white relative">
         {/* Intro Cinematic Preloader */}
-        {showIntro && <AnviGroupsPreloader onComplete={handleIntroComplete} />}
+        {showIntro && location.pathname !== '/gif' && <AnviGroupsPreloader onComplete={handleIntroComplete} />}
 
         <ScrollToTop />
         
