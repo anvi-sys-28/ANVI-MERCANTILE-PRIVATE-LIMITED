@@ -1,0 +1,374 @@
+/* Anvi Groups Cinematic Luxury Splash Screen / Preloader */
+
+:root {
+  --anvi-orange-dark: #7a2406;
+  --anvi-orange-rich: #d9480f;
+  --anvi-orange-bright: #ff7a1a;
+  --anvi-amber-highlight: #ffb36b;
+  --anvi-pure-white: #ffffff;
+  --anvi-ease-cinema: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Scroll lock when active */
+html.anvi-preloader-active,
+body.anvi-preloader-active {
+  overflow: hidden !important;
+  height: 100dvh !important;
+}
+
+/* Master preloader viewport container */
+.anvi-preloader-container {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  user-select: none;
+  background-color: #6b1c03;
+}
+
+/* 7 Vertical Panel Strips */
+.anvi-preloader-panels {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.anvi-preloader-panel {
+  position: relative;
+  height: 100%;
+  width: calc(100% / 7 + 1px);
+  margin-right: -1px;
+  background: linear-gradient(155deg, #6b1c03 0%, #b83808 30%, #d9480f 65%, #ff7a1a 95%);
+  will-change: transform;
+  overflow: hidden;
+}
+
+/* Specular highlight streak inside each panel */
+.anvi-preloader-panel::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: 20%;
+  width: 15%;
+  height: 200%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(12deg);
+  pointer-events: none;
+}
+
+/* Edge Radial Dark Vignette */
+.anvi-preloader-vignette {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+  background: radial-gradient(
+    circle at 50% 50%,
+    transparent 35%,
+    rgba(65, 15, 2, 0.45) 75%,
+    rgba(38, 8, 1, 0.85) 100%
+  );
+}
+
+/* Noise Grain Texture Overlay */
+.anvi-preloader-noise {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0.035;
+}
+
+/* Center Brand Content Stack */
+.anvi-brand-stack {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  max-width: 90vw;
+  padding: 24px;
+  will-change: opacity, transform;
+}
+
+/* Brand Monogram SVG */
+.anvi-monogram-wrap {
+  width: 150px;
+  max-width: 38vw;
+  height: auto;
+  margin-bottom: 22px;
+  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.35));
+}
+
+.anvi-monogram-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.anvi-monogram-path {
+  fill: #ffffff;
+  stroke: #ffffff;
+  stroke-width: 12px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  fill-opacity: 0;
+  animation:
+    anviDrawStroke 1.25s var(--anvi-ease-cinema) 0.4s forwards,
+    anviFadeFill 0.75s ease-out 1.5s forwards;
+}
+
+@keyframes anviDrawStroke {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes anviFadeFill {
+  0% {
+    fill-opacity: 0;
+  }
+  100% {
+    fill-opacity: 1;
+  }
+}
+
+/* Company Name "ANVI GROUPS" */
+.anvi-company-title {
+  font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(24px, 5.5vw, 42px);
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  color: #ffffff;
+  text-transform: uppercase;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+  text-shadow: 0 0 24px rgba(255, 255, 255, 0.45);
+  opacity: 0;
+  animation: anviTitleSettle 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) 1.6s forwards;
+}
+
+@keyframes anviTitleSettle {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+    letter-spacing: 0.38em;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    letter-spacing: 0.26em;
+  }
+}
+
+/* Horizontal Divider Lines */
+.anvi-divider-line {
+  height: 1px;
+  width: 280px;
+  max-width: 78vw;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.95) 25%,
+    rgba(255, 255, 255, 0.95) 75%,
+    transparent 100%
+  );
+  transform: scaleX(0);
+  transform-origin: center;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
+.anvi-divider-top {
+  margin-top: 14px;
+  margin-bottom: 12px;
+  animation: anviExpandLine 0.85s var(--anvi-ease-cinema) 2.2s forwards;
+}
+
+.anvi-divider-bottom {
+  margin-top: 12px;
+  margin-bottom: 24px;
+  animation: anviExpandLine 0.85s var(--anvi-ease-cinema) 2.9s forwards;
+}
+
+@keyframes anviExpandLine {
+  0% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* Subsidiaries Stack */
+.anvi-subsidiaries-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.anvi-sub-name {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  font-size: clamp(9px, 2.2vw, 12px);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  text-transform: uppercase;
+  letter-spacing: 3.5px;
+  margin: 0;
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.anvi-sub-1 {
+  animation: anviFadeUpSub 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 2.5s forwards;
+}
+
+.anvi-sub-2 {
+  animation: anviFadeUpSub 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 2.75s forwards;
+}
+
+@keyframes anviFadeUpSub {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Progress Counter Bar */
+.anvi-progress-section {
+  position: absolute;
+  bottom: 40px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 5;
+}
+
+.anvi-progress-track {
+  width: 220px;
+  max-width: 65vw;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.anvi-progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  height: 100%;
+  background-color: #ffffff;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+  transition: width 0.05s linear;
+}
+
+.anvi-progress-counter {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Exit Transition States */
+.anvi-preloader-container.anvi-exiting .anvi-brand-stack,
+.anvi-preloader-container.anvi-exiting .anvi-progress-section {
+  opacity: 0;
+  transform: scale(0.98);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+/* Shutter split animation on the 7 panels */
+.anvi-preloader-container.anvi-exiting .anvi-preloader-panel:nth-child(even) {
+  animation: anviShutterUp 1s var(--anvi-ease-cinema) forwards;
+}
+
+.anvi-preloader-container.anvi-exiting .anvi-preloader-panel:nth-child(odd) {
+  animation: anviShutterDown 1s var(--anvi-ease-cinema) forwards;
+}
+
+/* Staggered delay: index * 0.045s */
+.anvi-preloader-container.anvi-exiting .anvi-preloader-panel:nth-child(1) { animation-delay: 0s; }
+.anvi-preloader-container.anvi-exiting .anvi-preloader-panel:nth-child(2) { animation-delay: 0.045s; }
+.anvi-preloader-container.anvi-exiting .anvi-preloader-panel:nth-child(3) { animation-delay: 0.09s; }
+.anvi-preloader-container.anvi-exiting .anvi-preloader-panel:nth-child(4) { animation-delay: 0.135s; }
+.anvi-preloader-container.anvi-exiting .anvi-preloader-panel:nth-child(5) { animation-delay: 0.18s; }
+.anvi-preloader-container.anvi-exiting .anvi-preloader-panel:nth-child(6) { animation-delay: 0.225s; }
+.anvi-preloader-container.anvi-exiting .anvi-preloader-panel:nth-child(7) { animation-delay: 0.27s; }
+
+@keyframes anviShutterUp {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-102%);
+  }
+}
+
+@keyframes anviShutterDown {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(102%);
+  }
+}
+
+/* Accessibility: prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .anvi-monogram-path,
+  .anvi-company-title,
+  .anvi-divider-line,
+  .anvi-sub-name {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    stroke-dashoffset: 0 !important;
+    fill-opacity: 1 !important;
+  }
+  .anvi-preloader-container.anvi-exiting {
+    opacity: 0;
+    transition: opacity 1s ease-out;
+  }
+  .anvi-preloader-container.anvi-exiting .anvi-preloader-panel {
+    animation: none !important;
+  }
+}

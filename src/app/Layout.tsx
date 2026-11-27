@@ -5,7 +5,7 @@ import { Footer } from '@/components/global/Footer';
 import { MobileStickyQuoteCTA } from '@/components/global/MobileStickyQuoteCTA';
 import { ThemeToggle } from '@/components/global/ThemeToggle';
 import { ScrollToTop } from '@/app/ScrollToTop';
-import { IntroSplashScreen } from '@/components/global/IntroSplashScreen';
+import { AnviGroupsPreloader } from '@/components/global/AnviGroupsPreloader';
 import { CartProvider } from '@/context/CartContext';
 import { CartDrawer } from '@/components/cart/CartDrawer';
 
@@ -46,8 +46,8 @@ export function Layout() {
   return (
     <CartProvider>
       <div className="min-h-screen flex flex-col justify-between bg-[#030712] text-white relative">
-        {/* Intro Opening Animation */}
-        {showIntro && <IntroSplashScreen onComplete={handleIntroComplete} />}
+        {/* Intro Cinematic Preloader */}
+        {showIntro && <AnviGroupsPreloader onComplete={handleIntroComplete} />}
 
         <ScrollToTop />
         
